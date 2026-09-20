@@ -48,6 +48,7 @@ dependencies:
   google_sign_in: ^7.2.0
   http: ^1.6.0
   shared_preferences: ^2.5.5
+  flutter_native_splash: ^2.4.8
 
 dev_dependencies:
   flutter_test:
@@ -59,3 +60,22 @@ flutter:
   assets:
     - assets/images/
     - assets/lang/
+
+flutter_native_splash:
+  color: "#0B0E17"
+  image: assets/images/ps-trader-logo.png
+  color_dark: "#0B0E17"
+  image_dark: assets/images/ps-trader-logo.png
+
+  android_12:
+    image: assets/images/ps-trader-logo.png
+    color: "#0B0E17"
+    icon_background_color: "#0B0E17"
+    image_dark: assets/images/ps-trader-logo.png
+    color_dark: "#0B0E17"
+    icon_background_color_dark: "#0B0E17"
+
+  android: true
+  ios: true
+  web: false
+  fullscreen: true

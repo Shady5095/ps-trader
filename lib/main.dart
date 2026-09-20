@@ -7,6 +7,7 @@ import 'core/localization/app_locale.dart';
 import 'cubits/auth/auth_cubit.dart';
 import 'cubits/auth/auth_state.dart';
 import 'cubits/locale/locale_cubit.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'cubits/trades/trades_cubit.dart';
 import 'firebase_options.dart';
 import 'screens/auth/login_screen.dart';
@@ -14,7 +15,9 @@ import 'screens/dashboard_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -23,6 +26,8 @@ void main() async {
   final savedLang = prefs.getString(LocaleCubit.localeKey);
   final initialLocale =
       (savedLang == 'en') ? const Locale('en') : const Locale('ar');
+
+  FlutterNativeSplash.remove();
 
   runApp(PsTradesApp(initialLocale: initialLocale));
 }
