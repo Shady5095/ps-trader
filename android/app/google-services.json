@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "224837304509",
+    "project_id": "playstation-trader",
+    "storage_bucket": "playstation-trader.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224837304509:android:4c4db1cb4975b2a96db7d4",
+        "android_client_info": {
+          "package_name": "com.example.ps_trade_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAntO7xcDQ0DMuGXn7iQ2JkzgJLMs1Cqu8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

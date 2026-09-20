@@ -1,0 +1,26 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "playstation-trader",
+          "appId": "1:224837304509:android:4c4db1cb4975b2a96db7d4",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "playstation-trader",
+          "configurations": {
+            "android": "1:224837304509:android:4c4db1cb4975b2a96db7d4",
+            "ios": "1:224837304509:ios:570ce9cdd354c0ae6db7d4",
+            "windows": "1:224837304509:web:ed1fc890ab949e8c6db7d4"
+          }
+        }
+      }
+    }
+  }
+}
