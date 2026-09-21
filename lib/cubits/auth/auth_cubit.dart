@@ -36,8 +36,6 @@ class AuthCubit extends Cubit<AuthState> {
       // سيتم انبعاث Authenticated تلقائياً عبر authStateChanges
     } catch (e) {
       emit(AuthFailure(AuthService.getErrorMessage(e)));
-      // إذا كان المستخدم لا يزال غير مسجل دخول، نعيده لحالة Unauthenticated بعد إظهار الخطأ
-      emit(const Unauthenticated());
     }
   }
 
@@ -51,7 +49,6 @@ class AuthCubit extends Cubit<AuthState> {
       }
     } catch (e) {
       emit(AuthFailure(AuthService.getErrorMessage(e)));
-      emit(const Unauthenticated());
     }
   }
 

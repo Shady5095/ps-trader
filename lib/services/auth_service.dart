@@ -96,7 +96,11 @@ class AuthService {
           return 'لم يتم العثور على حساب بهذا البريد الإلكتروني.';
         case 'wrong-password':
         case 'invalid-credential':
-          return 'كلمة المرور أو البريد الإلكتروني غير صحيح.';
+        case 'invalid-login-credentials':
+        case 'INVALID_LOGIN_CREDENTIALS':
+          return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+        case 'channel-error':
+          return 'يرجى إدخال البريد الإلكتروني وكلمة المرور.';
         case 'invalid-email':
           return 'صيغة البريد الإلكتروني غير صحيحة.';
         case 'user-disabled':

@@ -19,6 +19,20 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   bool _obscurePassword = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailCtrl.addListener(_onFieldChanged);
+    _passwordCtrl.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    if (_errorMessage != null) {
+      setState(() => _errorMessage = null);
+    }
+  }
 
   @override
   void dispose() {
@@ -29,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _signInWithEmail() {
     if (!_formKey.currentState!.validate()) return;
+    setState(() => _errorMessage = null);
     context.read<AuthCubit>().signInWithEmail(
           email: _emailCtrl.text.trim(),
           password: _passwordCtrl.text,
@@ -36,15 +51,36 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _signInWithGoogle() {
+    setState(() => _errorMessage = null);
     context.read<AuthCubit>().signInWithGoogle();
   }
 
   void _showError(String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline_rounded,
+                color: Colors.white, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
         backgroundColor: AppColors.danger,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        duration: const Duration(seconds: 4),
       ),
     );
   }
@@ -54,7 +90,14 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthFailure) {
+          setState(() {
+            _errorMessage = state.message;
+          });
           _showError(state.message);
+        } else if (state is Authenticated) {
+          setState(() {
+            _errorMessage = null;
+          });
         }
       },
       builder: (context, state) {
@@ -122,6 +165,44 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 32),
+
+                        if (_errorMessage != null) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: AppColors.danger.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.danger.withValues(alpha: 0.45),
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.error_outline_rounded,
+                                  color: AppColors.danger,
+                                  size: 22,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    _errorMessage!,
+                                    style: const TextStyle(
+                                      color: AppColors.danger,
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.35,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
 
                         // Email Field
                         Text(

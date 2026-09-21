@@ -9,6 +9,7 @@ import '../models/trade.dart';
 import '../theme/app_theme.dart';
 import '../widgets/custom_drop_down_menu.dart';
 import '../widgets/device_image_picker.dart';
+import 'barcode_scanner_screen.dart';
 
 class AddEditTradeScreen extends StatefulWidget {
   final Trade? existing;
@@ -116,6 +117,18 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
       lastDate: DateTime(2100),
     );
     if (picked != null) setState(() => _purchaseDate = picked);
+  }
+
+  Future<void> _scanSerialNumberBarcode() async {
+    final scannedCode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+    );
+    if (scannedCode != null && scannedCode.trim().isNotEmpty) {
+      setState(() {
+        _serialNumberCtrl.text = scannedCode.trim();
+      });
+    }
   }
 
   Future<void> _save() async {
@@ -333,6 +346,11 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
                     controller: _serialNumberCtrl,
                     decoration: InputDecoration(
                       labelText: AppStrings.serialNumber.tr(context),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.primary),
+                        tooltip: AppStrings.scanBarcode.tr(context),
+                        onPressed: _saving ? null : _scanSerialNumberBarcode,
+                      ),
                     ),
                   ),
                 ),

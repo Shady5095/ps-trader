@@ -142,4 +142,20 @@ class AppStrings {
   static const String selectReleaseNumber = 'selectReleaseNumber';
   static const String months = 'months';
   static const String saleData = 'saleData';
+  static const String scanBarcode = 'scanBarcode';
+  static const String pointCameraAtBarcode = 'pointCameraAtBarcode';
+  static const String cameraPermissionRequired = 'cameraPermissionRequired';
+  static const String dataExport = 'dataExport';
+  static const String exportToExcel = 'exportToExcel';
+  static const String exportToExcelDesc = 'exportToExcelDesc';
+  static const String exportingExcel = 'exportingExcel';
+  static const String excelExportSuccess = 'excelExportSuccess';
+  static const String excelExportFailed = 'excelExportFailed';
+  static const String noTradesToExport = 'noTradesToExport';
+  static const String saveToDevice = 'saveToDevice';
+  static const String saveToDeviceDesc = 'saveToDeviceDesc';
+  static const String shareFile = 'shareFile';
+  static const String shareFileDesc = 'shareFileDesc';
+  static const String fileSavedSuccess = 'fileSavedSuccess';
+  static const String chooseAction = 'chooseAction';
 }

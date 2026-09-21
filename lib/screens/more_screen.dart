@@ -5,10 +5,21 @@ import '../core/localization/app_strings.dart';
 import '../cubits/auth/auth_cubit.dart';
 import '../cubits/auth/auth_state.dart';
 import '../cubits/locale/locale_cubit.dart';
+import '../cubits/trades/trades_cubit.dart';
+import '../cubits/trades/trades_state.dart';
+import '../models/trade.dart';
+import '../services/excel_export_service.dart';
 import '../theme/app_theme.dart';
 
-class MoreScreen extends StatelessWidget {
+class MoreScreen extends StatefulWidget {
   const MoreScreen({super.key});
+
+  @override
+  State<MoreScreen> createState() => _MoreScreenState();
+}
+
+class _MoreScreenState extends State<MoreScreen> {
+  bool _isExporting = false;
 
   void _confirmSignOut(BuildContext context) {
     final authState = context.read<AuthCubit>().state;
@@ -110,6 +121,227 @@ class MoreScreen extends StatelessWidget {
     );
   }
 
+  void _onExportTapped() {
+    final tradesState = context.read<TradesCubit>().state;
+    if (tradesState is! TradesLoaded || tradesState.trades.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.noTradesToExport.tr(context)),
+          backgroundColor: AppColors.surfaceAlt,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    _showExportOptionsSheet(tradesState.trades);
+  }
+
+  void _showExportOptionsSheet(List<Trade> trades) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetCtx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF107C41).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.table_chart_rounded,
+                      color: Color(0xFF107C41),
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppStrings.exportToExcel.tr(context),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          AppStrings.chooseAction.tr(context),
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Divider(color: AppColors.border),
+              const SizedBox(height: 8),
+
+              // Option 1: Save to Device
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF107C41).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.file_download_outlined,
+                    color: Color(0xFF107C41),
+                    size: 24,
+                  ),
+                ),
+                title: Text(
+                  AppStrings.saveToDevice.tr(context),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                subtitle: Text(
+                  AppStrings.saveToDeviceDesc.tr(context),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                trailing: const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  _handleSaveToDevice(trades);
+                },
+              ),
+
+              const SizedBox(height: 8),
+
+              // Option 2: Share File
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.share_rounded,
+                    color: AppColors.primary,
+                    size: 24,
+                  ),
+                ),
+                title: Text(
+                  AppStrings.shareFile.tr(context),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                subtitle: Text(
+                  AppStrings.shareFileDesc.tr(context),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                trailing: const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  _handleShareFile(trades);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleSaveToDevice(List<Trade> trades) async {
+    setState(() => _isExporting = true);
+    try {
+      const excelService = ExcelExportService();
+      final savedPath = await excelService.saveToDevice(trades);
+      if (!mounted) return;
+      final displayFilename = savedPath.split('/').last.split('\\').last;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${AppStrings.fileSavedSuccess.tr(context)}: $displayFilename'),
+          backgroundColor: const Color(0xFF107C41),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${AppStrings.excelExportFailed.tr(context)}: $e'),
+          backgroundColor: AppColors.danger,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
+    }
+  }
+
+  Future<void> _handleShareFile(List<Trade> trades) async {
+    setState(() => _isExporting = true);
+    try {
+      const excelService = ExcelExportService();
+      await excelService.shareFile(trades);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.excelExportSuccess.tr(context)),
+          backgroundColor: const Color(0xFF107C41),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${AppStrings.excelExportFailed.tr(context)}: $e'),
+          backgroundColor: AppColors.danger,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<AuthCubit>().state;
@@ -190,6 +422,66 @@ class MoreScreen extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Data Export Section Header
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Text(
+            AppStrings.dataExport.tr(context),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+
+        // Data Export Card
+        Card(
+          child: ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF107C41).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.table_chart_rounded,
+                color: Color(0xFF107C41),
+                size: 20,
+              ),
+            ),
+            title: Text(
+              AppStrings.exportToExcel.tr(context),
+              style: const TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            subtitle: Text(
+              AppStrings.exportToExcelDesc.tr(context),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            trailing: _isExporting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.2,
+                      color: Color(0xFF107C41),
+                    ),
+                  )
+                : const Icon(
+                    Icons.file_download_outlined,
+                    color: Color(0xFF107C41),
+                  ),
+            onTap: _isExporting ? null : _onExportTapped,
           ),
         ),
         const SizedBox(height: 16),

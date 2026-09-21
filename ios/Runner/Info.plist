@@ -70,5 +70,7 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>NSCameraUsageDescription</key>
+		<string>يحتاج التطبيق إذن الكاميرا لمسح باركود السيريال وتصوير الأجهزة.</string>
 	</dict>
 </plist>

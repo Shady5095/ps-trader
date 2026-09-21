@@ -42,6 +42,7 @@ dependencies:
 
   # Share / export
   share_plus: ^13.3.0
+  syncfusion_flutter_xlsio: ^34.2.8
   firebase_core: ^4.15.0
   firebase_auth: ^6.7.0
   cloud_firestore: ^6.10.0
@@ -49,6 +50,8 @@ dependencies:
   http: ^1.6.0
   shared_preferences: ^2.5.5
   flutter_native_splash: ^2.4.8
+  mobile_scanner: ^7.4.2
+  file_saver: ^0.4.0
 
 dev_dependencies:
   flutter_test:

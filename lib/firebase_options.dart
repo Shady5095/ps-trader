@@ -48,19 +48,20 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAntO7xcDQ0DMuGXn7iQ2JkzgJLMs1Cqu8',
-    appId: '1:224837304509:android:4c4db1cb4975b2a96db7d4',
+    appId: '1:224837304509:android:3cb59a85ff99d5136db7d4',
     messagingSenderId: '224837304509',
     projectId: 'playstation-trader',
     storageBucket: 'playstation-trader.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBzyFGeq_5RNWdJp_tgHHL1b5zLwVkzFcg',
-    appId: '1:224837304509:ios:570ce9cdd354c0ae6db7d4',
+    appId: '1:224837304509:ios:467ac187c356fe686db7d4',
     messagingSenderId: '224837304509',
     projectId: 'playstation-trader',
     storageBucket: 'playstation-trader.firebasestorage.app',
-    iosBundleId: 'com.example.psTradeApp',
+    androidClientId: '224837304509-c07d20takpe8lcj5onn7h3jbmsosql2b.apps.googleusercontent.com',
+    iosClientId: '224837304509-qnrpeehjjle0lmaoq8duvc2h7v662893.apps.googleusercontent.com',
+    iosBundleId: 'com.shady.pstrader',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
