@@ -140,7 +140,7 @@ class AppStrings {
   static const String totalSellPrice = 'totalSellPrice';
   static const String selectDeviceType = 'selectDeviceType';
   static const String selectReleaseNumber = 'selectReleaseNumber';
-  static const String months = 'months';
+  static const String months = 'M';
   static const String saleData = 'saleData';
   static const String scanBarcode = 'scanBarcode';
   static const String pointCameraAtBarcode = 'pointCameraAtBarcode';

@@ -206,3 +206,4 @@ class TradesCubit extends Cubit<TradesState> {
     return super.close();
   }
 }
+

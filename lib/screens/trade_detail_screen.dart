@@ -63,65 +63,88 @@ class TradeDetailScreen extends StatelessWidget {
           ),
           _DetailCard(
             children: [
-              _row(AppStrings.deviceType.tr(context), currentTrade.deviceType),
-              if (currentTrade.modelCode.isNotEmpty) ...[
-                const Divider(color: AppColors.border),
-                _row(AppStrings.releaseNumber.tr(context),
-                    currentTrade.modelCode),
-              ],
-              const Divider(color: AppColors.border),
               _row(
-                AppStrings.box.tr(context),
-                currentTrade.hasBox
-                    ? AppStrings.boxAvailable.tr(context)
-                    : AppStrings.boxNotAvailable.tr(context),
-                valueColor: currentTrade.hasBox
-                    ? AppColors.accent
-                    : AppColors.textSecondary,
+                AppStrings.deviceType.tr(context),
+                currentTrade.modelCode.isNotEmpty
+                    ? '${currentTrade.deviceType} ${currentTrade.modelCode}'
+                    : currentTrade.deviceType,
               ),
               const Divider(color: AppColors.border),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      AppStrings.deviceCondition.tr(context),
-                      style: const TextStyle(
-                          color: AppColors.textSecondary, fontSize: 13),
-                    ),
-                    const SizedBox(width: 12),
-                    StarRatingWidget(
-                      rating: currentTrade.conditionRating,
-                      starSize: 18,
-                      showLabel: false,
-                    ),
-                  ],
+              _pairRow(
+                label1: AppStrings.deviceCondition.tr(context),
+                value1: StarRatingWidget(
+                  rating: currentTrade.conditionRating,
+                  starSize: 16,
+                  showLabel: false,
+                ),
+                label2: AppStrings.box.tr(context),
+                value2: Text(
+                  currentTrade.hasBox
+                      ? AppStrings.boxAvailable.tr(context)
+                      : AppStrings.boxNotAvailable.tr(context),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: currentTrade.hasBox
+                        ? AppColors.accent
+                        : AppColors.textSecondary,
+                  ),
                 ),
               ),
               const Divider(color: AppColors.border),
-              _row(AppStrings.controllersCount.tr(context),
-                  '${currentTrade.controllers}'),
+              _pairRow(
+                label1: AppStrings.controllersCount.tr(context),
+                value1: Text(
+                  '${currentTrade.controllers}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.5,
+                  ),
+                ),
+                label2: AppStrings.gamesCount.tr(context),
+                value2: Text(
+                  '${currentTrade.games.isNotEmpty ? currentTrade.games.length : currentTrade.gamesCount}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.5,
+                  ),
+                ),
+              ),
               const Divider(color: AppColors.border),
-              _row(AppStrings.remainingWarranty.tr(context),
-                  '${currentTrade.warrantyMonths} ${AppStrings.months.tr(context)}'),
+              _pairRow(
+                label1: AppStrings.status.tr(context),
+                value1: Text(
+                  _statusText(context, currentTrade, isSold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: isSold ? AppColors.accent : AppColors.gold,
+                  ),
+                ),
+                label2: AppStrings.remainingWarranty.tr(context),
+                value2: Text(
+                  '${currentTrade.warrantyMonths} ${AppStrings.months.tr(context)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
               const Divider(color: AppColors.border),
-              _row(AppStrings.purchaseDate.tr(context),
-                  dateFmt.format(currentTrade.purchaseDate)),
-              const Divider(color: AppColors.border),
-              _priceRow(AppStrings.purchasePrice.tr(context),
-                  currentTrade.purchasePrice, AppStrings.egp.tr(context)),
-              const Divider(color: AppColors.border),
-              _row(AppStrings.gamesCount.tr(context),
-                  '${currentTrade.games.isNotEmpty ? currentTrade.games.length : currentTrade.gamesCount}'),
-              const Divider(color: AppColors.border),
-              _row(
-                AppStrings.status.tr(context),
-                isSold
-                    ? AppStrings.sold.tr(context)
-                    : AppStrings.inStock.tr(context),
-                valueColor: isSold ? AppColors.accent : AppColors.gold,
+              _pairRow(
+                label1: AppStrings.purchaseDate.tr(context),
+                value1: Text(
+                  dateFmt.format(currentTrade.purchaseDate),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+                label2: AppStrings.purchasePrice.tr(context),
+                value2: _priceWidget(
+                  currentTrade.purchasePrice,
+                  AppStrings.egp.tr(context),
+                ),
               ),
               if (currentTrade.games.isEmpty && currentTrade.gamesIncluded.isNotEmpty) ...[
                 const Divider(color: AppColors.border),
@@ -163,50 +186,86 @@ class TradeDetailScreen extends StatelessWidget {
           if (isSold) ...[
             _DetailCard(
               children: [
-                _row(AppStrings.deviceSellPrice.tr(context),
-                    '${currency.format(currentTrade.deviceSellPrice ?? currentTrade.sellPrice ?? 0)} ${AppStrings.egp.tr(context)}'),
-                const Divider(color: AppColors.border),
-                _row(AppStrings.accessoriesSellPrice.tr(context),
-                    '${currency.format(currentTrade.accessoriesSellPrice ?? 0)} ${AppStrings.egp.tr(context)}'),
+                _pairRow(
+                  label1: AppStrings.deviceSellPrice.tr(context),
+                  value1: _priceWidget(
+                    currentTrade.deviceSellPrice ?? currentTrade.sellPrice ?? 0,
+                    AppStrings.egp.tr(context),
+                    color: AppColors.textPrimary,
+                  ),
+                  label2: AppStrings.accessoriesSellPrice.tr(context),
+                  value2: _priceWidget(
+                    currentTrade.accessoriesSellPrice ?? 0,
+                    AppStrings.egp.tr(context),
+                    color: AppColors.textPrimary,
+                  ),
+                ),
                 const Divider(color: AppColors.border),
                 _row(AppStrings.totalSellPrice.tr(context),
                     '${currency.format(currentTrade.sellPrice ?? 0)} ${AppStrings.egp.tr(context)}',
                     valueColor: AppColors.accent),
+                const Divider(color: AppColors.border),
+                _pairRow(
+                  label1: AppStrings.netProfit.tr(context),
+                  value1: Text(
+                    '${currency.format(currentTrade.profit ?? 0)} ${AppStrings.egp.tr(context)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: (currentTrade.profit ?? 0) >= 0
+                          ? AppColors.accent
+                          : AppColors.danger,
+                    ),
+                  ),
+                  label2: AppStrings.profitMargin.tr(context),
+                  value2: Text(
+                    '${(currentTrade.profitMargin ?? 0).toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: (currentTrade.profitMargin ?? 0) >= 0
+                          ? AppColors.accent
+                          : AppColors.danger,
+                    ),
+                  ),
+                ),
+                const Divider(color: AppColors.border),
                 if (currentTrade.sellingPlatform != null &&
                     currentTrade.sellingPlatform!.isNotEmpty) ...[
-                  const Divider(color: AppColors.border),
-                  _row(AppStrings.sellingPlatform.tr(context),
-                      currentTrade.sellingPlatform!),
+                  _pairRow(
+                    label1: AppStrings.sellDate.tr(context),
+                    value1: Text(
+                      currentTrade.sellDate != null
+                          ? dateFmt.format(currentTrade.sellDate!)
+                          : '—',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                    label2: AppStrings.sellingPlatform.tr(context),
+                    value2: Text(
+                      currentTrade.sellingPlatform!,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  _row(
+                    AppStrings.sellDate.tr(context),
+                    currentTrade.sellDate != null
+                        ? dateFmt.format(currentTrade.sellDate!)
+                        : '—',
+                  ),
                 ],
-                const Divider(color: AppColors.border),
-                _row(
-                  AppStrings.sellDate.tr(context),
-                  currentTrade.sellDate != null
-                      ? dateFmt.format(currentTrade.sellDate!)
-                      : '—',
-                ),
                 const Divider(color: AppColors.border),
                 _row(
                     AppStrings.buyerNumber.tr(context),
                     currentTrade.buyerNumber?.isEmpty ?? true
                         ? '—'
                         : currentTrade.buyerNumber!),
-                const Divider(color: AppColors.border),
-                _row(
-                  AppStrings.netProfit.tr(context),
-                  '${currency.format(currentTrade.profit ?? 0)} ${AppStrings.egp.tr(context)}',
-                  valueColor: (currentTrade.profit ?? 0) >= 0
-                      ? AppColors.accent
-                      : AppColors.danger,
-                ),
-                const Divider(color: AppColors.border),
-                _row(
-                  AppStrings.profitMargin.tr(context),
-                  '${(currentTrade.profitMargin ?? 0).toStringAsFixed(1)}%',
-                  valueColor: (currentTrade.profitMargin ?? 0) >= 0
-                      ? AppColors.accent
-                      : AppColors.danger,
-                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -264,44 +323,117 @@ class TradeDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _priceRow(String label, double amount, String currencyText) {
-    final currency = intl.NumberFormat('#,###', 'en_US');
+  Widget _pairRow({
+    required String label1,
+    required Widget value1,
+    required String label2,
+    required Widget value2,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style:
-                  const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-          const SizedBox(width: 12),
-          Flexible(
-            child: Text.rich(
-              TextSpan(
-                text: currency.format(amount),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13.5,
-                  color: AppColors.primary,
-                ),
-                children: [
-                  TextSpan(
-                    text: ' $currencyText',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13.5,
-                      color: AppColors.textPrimary,
-                    ),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  label1,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
                   ),
-                ],
-              ),
-              textAlign: TextAlign.left,
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: value1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            height: 18,
+            width: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            color: AppColors.border,
+          ),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  label2,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: value2,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _priceWidget(double amount, String currencyText, {Color? color}) {
+    final currency = intl.NumberFormat('#,###', 'en_US');
+    return Text.rich(
+      TextSpan(
+        text: currency.format(amount),
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 13.5,
+          color: color ?? AppColors.primary,
+        ),
+        children: [
+          TextSpan(
+            text: ' $currencyText',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13.5,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _statusText(BuildContext context, Trade currentTrade, bool isSold) {
+    if (!isSold) return AppStrings.inStock.tr(context);
+    final soldLabel = AppStrings.sold.tr(context);
+    if (currentTrade.sellDate == null) return soldLabel;
+    final pDate = DateTime(
+      currentTrade.purchaseDate.year,
+      currentTrade.purchaseDate.month,
+      currentTrade.purchaseDate.day,
+    );
+    final sDate = DateTime(
+      currentTrade.sellDate!.year,
+      currentTrade.sellDate!.month,
+      currentTrade.sellDate!.day,
+    );
+    final diff = sDate.difference(pDate).inDays;
+    final days = diff <= 1 ? 1 : diff;
+
+    if (isArabic(context)) {
+      return days == 1 ? 'تم بيعه في 1 يوم' : 'تم بيعه في $days أيام';
+    } else {
+      return '$soldLabel In ${days}d';
+    }
   }
 
   void _confirmDelete(BuildContext context, Trade currentTrade) {
