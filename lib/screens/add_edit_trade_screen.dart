@@ -6,9 +6,13 @@ import '../core/localization/app_strings.dart';
 import '../cubits/trades/trades_cubit.dart';
 import '../models/device_catalog.dart';
 import '../models/trade.dart';
+import '../models/trade_game.dart';
 import '../theme/app_theme.dart';
 import '../widgets/custom_drop_down_menu.dart';
 import '../widgets/device_image_picker.dart';
+import '../widgets/game_card_item.dart';
+import '../widgets/game_search_bottom_sheet.dart';
+import '../widgets/star_rating_widget.dart';
 import 'barcode_scanner_screen.dart';
 
 class AddEditTradeScreen extends StatefulWidget {
@@ -38,6 +42,9 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
   final _notesCtrl = TextEditingController();
   DateTime _purchaseDate = DateTime.now();
   List<String> _imagePaths = [];
+  List<TradeGame> _selectedGames = [];
+  int? _conditionRating;
+  bool _conditionRatingError = false;
   bool _saving = false;
 
   late final TextEditingController _deviceSellPriceCtrl;
@@ -71,6 +78,8 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
     _imagePaths = List<String>.from(
       e?.imagePaths ?? (e?.imagePath != null ? [e!.imagePath!] : const []),
     );
+    _selectedGames = List<TradeGame>.from(e?.games ?? const []);
+    _conditionRating = e?.conditionRating;
 
     final isSold = e?.status == TradeStatus.sold;
     _deviceSellPriceCtrl = TextEditingController(
@@ -131,8 +140,39 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
     }
   }
 
+  Future<void> _addGameToSelection() async {
+    final selectedGame = await GameSearchBottomSheet.show(
+      context,
+      existingGames: _selectedGames,
+    );
+    if (selectedGame != null) {
+      setState(() {
+        _selectedGames.add(selectedGame);
+        _gamesCountCtrl.text = _selectedGames.length.toString();
+        _gamesIncludedCtrl.text = _selectedGames.map((g) => g.name).join(', ');
+      });
+    }
+  }
+
+  void _removeGameFromSelection(TradeGame game) {
+    setState(() {
+      _selectedGames.removeWhere((g) => g == game || g.id == game.id || g.name == game.name);
+      _gamesCountCtrl.text = _selectedGames.length.toString();
+      _gamesIncludedCtrl.text = _selectedGames.map((g) => g.name).join(', ');
+    });
+  }
+
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    final bool hasRating = _conditionRating != null &&
+        _conditionRating! >= 1 &&
+        _conditionRating! <= 3;
+    if (!hasRating) {
+      setState(() => _conditionRatingError = true);
+    } else if (_conditionRatingError) {
+      setState(() => _conditionRatingError = false);
+    }
+
+    if (!_formKey.currentState!.validate() || !hasRating) return;
     setState(() => _saving = true);
 
     try {
@@ -153,7 +193,7 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
         final updated = widget.existing!.copyWith(
           deviceType: _deviceType,
           controllers: int.tryParse(_controllersCtrl.text) ?? 0,
-          gamesCount: int.tryParse(_gamesCountCtrl.text) ?? 0,
+          gamesCount: _selectedGames.isNotEmpty ? _selectedGames.length : (int.tryParse(_gamesCountCtrl.text) ?? 0),
           purchaseDate: _purchaseDate,
           purchasePrice: double.tryParse(_purchasePriceCtrl.text) ?? 0,
           sellerNumber: _sellerNumberCtrl.text.trim(),
@@ -176,13 +216,15 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
               ? _buyerNumberCtrl.text.trim()
               : widget.existing?.buyerNumber,
           sellDate: isSold ? _sellDate : widget.existing?.sellDate,
+          games: _selectedGames,
+          conditionRating: _conditionRating!,
         );
         await tradesCubit.updateTrade(updated);
       } else {
         await tradesCubit.addTrade(
           deviceType: _deviceType!,
           controllers: int.tryParse(_controllersCtrl.text) ?? 0,
-          gamesCount: int.tryParse(_gamesCountCtrl.text) ?? 0,
+          gamesCount: _selectedGames.isNotEmpty ? _selectedGames.length : (int.tryParse(_gamesCountCtrl.text) ?? 0),
           purchaseDate: _purchaseDate,
           purchasePrice: double.tryParse(_purchasePriceCtrl.text) ?? 0,
           sellerNumber: _sellerNumberCtrl.text.trim(),
@@ -195,6 +237,8 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
           purchasePlatform: _purchasePlatform,
           warrantyMonths: int.tryParse(_warrantyMonthsCtrl.text) ?? 0,
           imagePaths: _imagePaths,
+          games: _selectedGames,
+          conditionRating: _conditionRating!,
         );
       }
 
@@ -339,6 +383,66 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
               ],
             ),
             const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: _conditionRatingError
+                      ? AppColors.danger
+                      : AppColors.border,
+                  width: _conditionRatingError ? 1.5 : 1.0,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.grade_outlined,
+                          size: 18, color: AppColors.gold),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppStrings.deviceCondition.tr(context),
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const Spacer(),
+                      StarRatingWidget(
+                        rating: _conditionRating,
+                        starSize: 22,
+                        showLabel: false,
+                        onChanged: _saving
+                            ? null
+                            : (val) {
+                                setState(() {
+                                  _conditionRating = val;
+                                  _conditionRatingError = false;
+                                });
+                              },
+                      ),
+                    ],
+                  ),
+                  if (_conditionRatingError) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      AppStrings.conditionRatingRequired.tr(context),
+                      style: const TextStyle(
+                        color: AppColors.danger,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -405,13 +509,90 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
                   labelText: AppStrings.sellerNumber.tr(context)),
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _gamesIncludedCtrl,
-              maxLines: 4,
-              minLines: 1,
-              decoration: InputDecoration(
-                labelText: AppStrings.gamesIncluded.tr(context),
-                hintText: AppStrings.gamesIncludedHint.tr(context),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.sports_esports_rounded, size: 20, color: AppColors.primaryLight),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppStrings.gamesIncludedSection.tr(context),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceAlt,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Text(
+                          '${_selectedGames.length}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primaryLight,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      TextButton.icon(
+                        onPressed: _saving ? null : _addGameToSelection,
+                        icon: const Icon(Icons.add_rounded, size: 18),
+                        label: Text(AppStrings.addGame.tr(context)),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primaryLight,
+                          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_selectedGames.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 150,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _selectedGames.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 10),
+                        itemBuilder: (context, index) {
+                          final game = _selectedGames[index];
+                          return GameCardItem(
+                            game: game,
+                            width: 105,
+                            height: 150,
+                            onDelete: _saving ? null : () => _removeGameFromSelection(game),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _gamesIncludedCtrl,
+                    maxLines: 2,
+                    minLines: 1,
+                    style: const TextStyle(fontSize: 13),
+                    decoration: InputDecoration(
+                      labelText: AppStrings.gamesIncluded.tr(context),
+                      hintText: AppStrings.gamesIncludedHint.tr(context),
+                      isDense: true,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/trade.dart';
+import '../../models/trade_game.dart';
 import '../../services/auth_service.dart';
 import '../../services/imagekit_service.dart';
 import 'trades_state.dart';
@@ -91,6 +92,8 @@ class TradesCubit extends Cubit<TradesState> {
     int warrantyMonths = 0,
     List<String>? imagePaths,
     String? imagePath,
+    List<TradeGame>? games,
+    int conditionRating = 3,
   }) async {
     final currentUserId = _authService.currentUserId;
     if (currentUserId == null) {
@@ -127,6 +130,8 @@ class TradesCubit extends Cubit<TradesState> {
       warrantyMonths: warrantyMonths,
       status: TradeStatus.inStock,
       imagePaths: uploadedUrls,
+      games: games ?? const [],
+      conditionRating: conditionRating,
     );
 
     // 2. الحفظ في Firestore

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'trade_game.dart';
 
 enum TradeStatus { inStock, sold }
 
@@ -36,6 +37,8 @@ class Trade {
   final String? buyerNumber;
   final TradeStatus status;
   final List<String> imagePaths;
+  final List<TradeGame> games;
+  final int conditionRating;
 
   String? get imagePath => imagePaths.isNotEmpty ? imagePaths.first : null;
 
@@ -65,6 +68,8 @@ class Trade {
     required this.status,
     List<String>? imagePaths,
     String? imagePath,
+    this.games = const [],
+    this.conditionRating = 3,
   })  : deviceSellPrice = deviceSellPrice ?? sellPrice,
         accessoriesSellPrice = accessoriesSellPrice ??
             (deviceSellPrice != null ? 0.0 : null),
@@ -109,6 +114,8 @@ class Trade {
     TradeStatus? status,
     List<String>? imagePaths,
     String? imagePath,
+    List<TradeGame>? games,
+    int? conditionRating,
     bool clearSellPrice = false,
     bool clearSellDate = false,
     bool clearBuyerNumber = false,
@@ -163,6 +170,8 @@ class Trade {
       buyerNumber: clearBuyerNumber ? null : (buyerNumber ?? this.buyerNumber),
       status: status ?? this.status,
       imagePaths: newImages,
+      games: games ?? this.games,
+      conditionRating: conditionRating ?? this.conditionRating,
     );
   }
 
@@ -193,6 +202,8 @@ class Trade {
       'status': status.toDb,
       'imagePaths': imagePaths,
       'imagePath': imagePaths.isEmpty ? null : jsonEncode(imagePaths),
+      'games': games.map((g) => g.toMap()).toList(),
+      'conditionRating': conditionRating,
     };
   }
 
@@ -229,6 +240,17 @@ class Trade {
     final rawAccSellPrice = (map['accessoriesSellPrice'] as num?)?.toDouble() ??
         (rawDeviceSellPrice != null && rawSellPrice != null ? (rawSellPrice - rawDeviceSellPrice) : (rawDeviceSellPrice != null ? 0.0 : null));
 
+    List<TradeGame> parsedGames = [];
+    if (map['games'] is List) {
+      for (final item in map['games'] as List) {
+        if (item is Map<String, dynamic>) {
+          parsedGames.add(TradeGame.fromMap(item));
+        } else if (item is Map) {
+          parsedGames.add(TradeGame.fromMap(Map<String, dynamic>.from(item)));
+        }
+      }
+    }
+
     return Trade(
       id: map['id'] as String? ?? '',
       userId: map['userId'] as String? ?? '',
@@ -258,6 +280,8 @@ class Trade {
       buyerNumber: map['buyerNumber'] as String?,
       status: TradeStatusX.fromDb(map['status'] as String? ?? 'IN_STOCK'),
       imagePaths: images,
+      games: parsedGames,
+      conditionRating: (map['conditionRating'] as num?)?.toInt() ?? 3,
     );
   }
 }

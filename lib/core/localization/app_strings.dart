@@ -158,4 +158,27 @@ class AppStrings {
   static const String shareFileDesc = 'shareFileDesc';
   static const String fileSavedSuccess = 'fileSavedSuccess';
   static const String chooseAction = 'chooseAction';
+
+  /// Games System
+  static const String addGameTitle = 'addGameTitle';
+  static const String searchGamesHint = 'searchGamesHint';
+  static const String rawgKeyMissingNotice = 'rawgKeyMissingNotice';
+  static const String addGameManually = 'addGameManually';
+  static const String enterGameNameHint = 'enterGameNameHint';
+  static const String noGamesFound = 'noGamesFound';
+  static const String searchGamesInstructions = 'searchGamesInstructions';
+  static const String gameAlreadyAdded = 'gameAlreadyAdded';
+  static const String gamesIncludedSection = 'gamesIncludedSection';
+  static const String addGame = 'addGame';
+  static const String removeGameConfirm = 'removeGameConfirm';
+  static const String gameRemovedSuccess = 'gameRemovedSuccess';
+  static const String gameAddedSuccess = 'gameAddedSuccess';
+  static const String noGamesAttached = 'noGamesAttached';
+
+  /// Device Condition Rating
+  static const String deviceCondition = 'deviceCondition';
+  static const String conditionRatingRequired = 'conditionRatingRequired';
+  static const String conditionExcellent = 'conditionExcellent';
+  static const String conditionVeryGood = 'conditionVeryGood';
+  static const String conditionFair = 'conditionFair';
 }

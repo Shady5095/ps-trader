@@ -8,9 +8,13 @@ import '../cubits/trades/trades_cubit.dart';
 import '../cubits/trades/trades_state.dart';
 import '../models/device_catalog.dart';
 import '../models/trade.dart';
+import '../models/trade_game.dart';
 import '../theme/app_theme.dart';
 import '../widgets/custom_drop_down_menu.dart';
 import '../widgets/full_screen_image_viewer.dart';
+import '../widgets/game_card_item.dart';
+import '../widgets/game_search_bottom_sheet.dart';
+import '../widgets/star_rating_widget.dart';
 import 'add_edit_trade_screen.dart';
 
 class TradeDetailScreen extends StatelessWidget {
@@ -76,6 +80,27 @@ class TradeDetailScreen extends StatelessWidget {
                     : AppColors.textSecondary,
               ),
               const Divider(color: AppColors.border),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppStrings.deviceCondition.tr(context),
+                      style: const TextStyle(
+                          color: AppColors.textSecondary, fontSize: 13),
+                    ),
+                    const SizedBox(width: 12),
+                    StarRatingWidget(
+                      rating: currentTrade.conditionRating,
+                      starSize: 18,
+                      showLabel: false,
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: AppColors.border),
               _row(AppStrings.controllersCount.tr(context),
                   '${currentTrade.controllers}'),
               const Divider(color: AppColors.border),
@@ -89,7 +114,7 @@ class TradeDetailScreen extends StatelessWidget {
                   currentTrade.purchasePrice, AppStrings.egp.tr(context)),
               const Divider(color: AppColors.border),
               _row(AppStrings.gamesCount.tr(context),
-                  '${currentTrade.gamesCount}'),
+                  '${currentTrade.games.isNotEmpty ? currentTrade.games.length : currentTrade.gamesCount}'),
               const Divider(color: AppColors.border),
               _row(
                 AppStrings.status.tr(context),
@@ -98,7 +123,7 @@ class TradeDetailScreen extends StatelessWidget {
                     : AppStrings.inStock.tr(context),
                 valueColor: isSold ? AppColors.accent : AppColors.gold,
               ),
-              if (currentTrade.gamesIncluded.isNotEmpty) ...[
+              if (currentTrade.games.isEmpty && currentTrade.gamesIncluded.isNotEmpty) ...[
                 const Divider(color: AppColors.border),
                 _row(AppStrings.gamesIncluded.tr(context),
                     currentTrade.gamesIncluded),
@@ -132,6 +157,8 @@ class TradeDetailScreen extends StatelessWidget {
               ],
             ],
           ),
+          const SizedBox(height: 12),
+          _GamesIncludedCard(trade: currentTrade),
           const SizedBox(height: 12),
           if (isSold) ...[
             _DetailCard(
@@ -661,3 +688,207 @@ class _DetailCard extends StatelessWidget {
     );
   }
 }
+
+class _GamesIncludedCard extends StatelessWidget {
+  final Trade trade;
+  const _GamesIncludedCard({required this.trade});
+
+  void _addGame(BuildContext context) async {
+    final selectedGame = await GameSearchBottomSheet.show(
+      context,
+      existingGames: trade.games,
+    );
+
+    if (selectedGame != null && context.mounted) {
+      final updatedGames = List<TradeGame>.from(trade.games)..add(selectedGame);
+      final updatedTrade = trade.copyWith(
+        games: updatedGames,
+        gamesCount: updatedGames.length,
+        gamesIncluded: updatedGames.map((g) => g.name).join(', '),
+      );
+      await context.read<TradesCubit>().updateTrade(updatedTrade);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppStrings.gameAddedSuccess.tr(context)),
+            backgroundColor: AppColors.accent,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  void _confirmDeleteGame(BuildContext context, TradeGame game) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          game.name,
+          style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
+        ),
+        content: Text(
+          AppStrings.removeGameConfirm.tr(context),
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(AppStrings.cancel.tr(context)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final updatedGames = trade.games
+                  .where((g) => g != game && g.id != game.id && g.name != game.name)
+                  .toList();
+              final updatedTrade = trade.copyWith(
+                games: updatedGames,
+                gamesCount: updatedGames.length,
+                gamesIncluded: updatedGames.map((g) => g.name).join(', '),
+              );
+              await context.read<TradesCubit>().updateTrade(updatedTrade);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppStrings.gameRemovedSuccess.tr(context)),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            child: Text(AppStrings.delete.tr(context)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final games = trade.games;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.sports_esports_rounded,
+                    size: 18,
+                    color: AppColors.primaryLight,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  AppStrings.gamesIncludedSection.tr(context),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceAlt,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Text(
+                    '${games.length}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryLight,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () => _addGame(context),
+                  icon: const Icon(Icons.add_rounded, size: 18),
+                  label: Text(AppStrings.addGame.tr(context)),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primaryLight,
+                    textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (games.isEmpty)
+              InkWell(
+                onTap: () => _addGame(context),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceAlt.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.add_circle_outline_rounded,
+                        size: 36,
+                        color: AppColors.textSecondary.withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppStrings.noGamesAttached.tr(context),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        AppStrings.addGame.tr(context),
+                        style: const TextStyle(
+                          color: AppColors.primaryLight,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: games.map((game) {
+                  return GameCardItem(
+                    game: game,
+                    onDelete: () => _confirmDeleteGame(context, game),
+                  );
+                }).toList(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

@@ -76,11 +76,39 @@ class TradeCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '📍 ${trade.sellerLocation}   🎮 ${trade.controllers}   💽 ${trade.gamesCount}',
-                      style: const TextStyle(
-                          fontSize: 11.5, color: AppColors.textSecondary),
+                    const SizedBox(
+                      height: 3,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '📍 ${trade.sellerLocation}   🎮 ${trade.controllers}   💽 ${trade.gamesCount}',
+                            style: const TextStyle(
+                                fontSize: 11.5, color: AppColors.textSecondary),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (trade.conditionRating > 0) ...[
+                          const SizedBox(width: 6),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(
+                              3,
+                              (i) => Icon(
+                                i < trade.conditionRating
+                                    ? Icons.star_rounded
+                                    : Icons.star_outline_rounded,
+                                size: 13,
+                                color: i < trade.conditionRating
+                                    ? AppColors.gold
+                                    : AppColors.border,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 8),
                     Row(
