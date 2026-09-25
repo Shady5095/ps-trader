@@ -186,19 +186,14 @@ class TradeDetailScreen extends StatelessWidget {
           if (isSold) ...[
             _DetailCard(
               children: [
-                _pairRow(
-                  label1: AppStrings.deviceSellPrice.tr(context),
-                  value1: _priceWidget(
-                    currentTrade.deviceSellPrice ?? currentTrade.sellPrice ?? 0,
-                    AppStrings.egp.tr(context),
-                    color: AppColors.textPrimary,
-                  ),
-                  label2: AppStrings.accessoriesSellPrice.tr(context),
-                  value2: _priceWidget(
-                    currentTrade.accessoriesSellPrice ?? 0,
-                    AppStrings.egp.tr(context),
-                    color: AppColors.textPrimary,
-                  ),
+                _row(
+                  AppStrings.deviceSellPrice.tr(context),
+                  '${currency.format(currentTrade.deviceSellPrice ?? currentTrade.sellPrice ?? 0)} ${AppStrings.egp.tr(context)}',
+                ),
+                const Divider(color: AppColors.border),
+                _row(
+                  AppStrings.accessoriesSellPrice.tr(context),
+                  '${currency.format(currentTrade.accessoriesSellPrice ?? 0)} ${AppStrings.egp.tr(context)}',
                 ),
                 const Divider(color: AppColors.border),
                 _row(AppStrings.totalSellPrice.tr(context),

@@ -39,6 +39,24 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  Future<void> signUpWithEmail({
+    required String fullName,
+    required String email,
+    required String password,
+  }) async {
+    emit(const AuthLoading());
+    try {
+      await _authService.signUpWithEmailAndPassword(
+        fullName: fullName,
+        email: email,
+        password: password,
+      );
+      // سيتم انبعاث Authenticated تلقائياً عبر authStateChanges
+    } catch (e) {
+      emit(AuthFailure(AuthService.getErrorMessage(e)));
+    }
+  }
+
   Future<void> signInWithGoogle() async {
     emit(const AuthLoading());
     try {

@@ -9,9 +9,12 @@ import '../models/trade.dart';
 import '../services/stats_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/stat_card.dart';
+import '../widgets/period_selector.dart';
 import '../widgets/charts/monthly_profit_chart.dart';
+import '../widgets/charts/daily_profit_chart.dart';
 import '../widgets/charts/device_distribution_chart.dart';
 import '../widgets/charts/profit_by_device_chart.dart';
+import '../widgets/charts/popular_games_row_widget.dart';
 import 'add_edit_trade_screen.dart';
 import 'more_screen.dart';
 import 'trades_list_screen.dart';
@@ -81,8 +84,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-class _DashboardBody extends StatelessWidget {
+class _DashboardBody extends StatefulWidget {
   const _DashboardBody();
+
+  @override
+  State<_DashboardBody> createState() => _DashboardBodyState();
+}
+
+class _DashboardBodyState extends State<_DashboardBody> {
+  DateTime? _selectedMonth;
 
   @override
   Widget build(BuildContext context) {
@@ -120,17 +130,36 @@ class _DashboardBody extends StatelessWidget {
 
         final trades =
             (state is TradesLoaded) ? state.trades : const <Trade>[];
-        final stats = StatsService(trades);
+        final isAllTime = _selectedMonth == null;
+        final stats = isAllTime
+            ? StatsService(trades)
+            : StatsService.forMonth(trades, _selectedMonth!);
         final currency = intl.NumberFormat('#,##0');
         final egp = AppStrings.egp.tr(context);
+
+        final String profitChartTitle;
+        if (isAllTime) {
+          profitChartTitle = AppStrings.monthlyProfit.tr(context);
+        } else {
+          final locale = Localizations.localeOf(context).languageCode;
+          final monthFormatted =
+              intl.DateFormat('MMMM yyyy', locale).format(_selectedMonth!);
+          profitChartTitle =
+              '${AppStrings.dailyProfit.tr(context)} ($monthFormatted)';
+        }
 
         return RefreshIndicator(
           onRefresh: () => context.read<TradesCubit>().refresh(),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              PeriodSelectorWidget(
+                selectedMonth: _selectedMonth,
+                onPeriodChanged: (m) => setState(() => _selectedMonth = m),
+              ),
+              const SizedBox(height: 16),
               GridView.count(
-                 crossAxisCount: 2,
+                crossAxisCount: 2,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: 12,
@@ -165,8 +194,11 @@ class _DashboardBody extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _SectionCard(
-                title: AppStrings.monthlyProfit.tr(context),
-                child: MonthlyProfitChart(data: stats.monthlyProfit()),
+                title: profitChartTitle,
+                child: isAllTime
+                    ? MonthlyProfitChart(data: stats.monthlyProfit())
+                    : DailyProfitChart(
+                        data: stats.dailyProfitsForMonth(_selectedMonth!)),
               ),
               const SizedBox(height: 16),
               _SectionCard(
@@ -177,6 +209,13 @@ class _DashboardBody extends StatelessWidget {
               _SectionCard(
                 title: AppStrings.profitByDevice.tr(context),
                 child: ProfitByDeviceChart(data: stats.byDeviceType()),
+              ),
+              const SizedBox(height: 16),
+              _SectionCard(
+                title: AppStrings.mostPopularGames.tr(context),
+                child: PopularGamesRowWidget(
+                  popularGames: stats.popularGames(limit: 15),
+                ),
               ),
               const SizedBox(height: 80),
             ],

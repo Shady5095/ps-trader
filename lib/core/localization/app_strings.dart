@@ -181,4 +181,33 @@ class AppStrings {
   static const String conditionExcellent = 'conditionExcellent';
   static const String conditionVeryGood = 'conditionVeryGood';
   static const String conditionFair = 'conditionFair';
+
+  /// Period Selector & Daily Profit
+  static const String allTime = 'allTime';
+  static const String dailyProfit = 'dailyProfit';
+
+  /// Arrange / Sorting
+  static const String arrangeBy = 'arrangeBy';
+  static const String sortByBuyPrice = 'sortByBuyPrice';
+  static const String sortBySellPrice = 'sortBySellPrice';
+  static const String sortByProfit = 'sortByProfit';
+  static const String sortBySoldDays = 'sortBySoldDays';
+  static const String sortDefault = 'sortDefault';
+  static const String sortHighToLow = 'sortHighToLow';
+  static const String sortLowToHigh = 'sortLowToHigh';
+
+  /// Popular Games
+  static const String mostPopularGames = 'mostPopularGames';
+  static const String noGamesInPeriod = 'noGamesInPeriod';
+
+  /// Auth / Registration
+  static const String fullName = 'fullName';
+  static const String createAccount = 'createAccount';
+  static const String haveAccount = 'haveAccount';
+  static const String dontHaveAccount = 'dontHaveAccount';
+  static const String signUp = 'signUp';
+  static const String fullNameHint = 'fullNameHint';
+  static const String fullNameRequired = 'fullNameRequired';
+  static const String confirmPasswordRequired = 'confirmPasswordRequired';
+  static const String passwordsDoNotMatch = 'passwordsDoNotMatch';
 }

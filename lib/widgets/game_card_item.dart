@@ -8,6 +8,8 @@ class GameCardItem extends StatelessWidget {
   final VoidCallback? onTap;
   final double width;
   final double height;
+  final String? subtitle;
+  final Widget? rankBadge;
 
   const GameCardItem({
     super.key,
@@ -16,6 +18,8 @@ class GameCardItem extends StatelessWidget {
     this.onTap,
     this.width = 115,
     this.height = 165,
+    this.subtitle,
+    this.rankBadge,
   });
 
   @override
@@ -83,7 +87,7 @@ class GameCardItem extends StatelessWidget {
             ),
           ),
 
-          // Game Title & Year
+          // Game Title & Year / Subtitle
           Positioned(
             left: 8,
             right: 8,
@@ -103,7 +107,17 @@ class GameCardItem extends StatelessWidget {
                     height: 1.2,
                   ),
                 ),
-                if (game.releaseYear != null && game.releaseYear!.isNotEmpty) ...[
+                if (subtitle != null && subtitle!.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle!,
+                    style: const TextStyle(
+                      color: AppColors.primaryLight,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ] else if (game.releaseYear != null && game.releaseYear!.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
                     game.releaseYear!,
@@ -117,6 +131,14 @@ class GameCardItem extends StatelessWidget {
               ],
             ),
           ),
+
+          // Rank Badge (if provided)
+          if (rankBadge != null)
+            Positioned(
+              top: 6,
+              left: 6,
+              child: rankBadge!,
+            ),
 
           // Delete Button (if provided)
           if (onDelete != null)

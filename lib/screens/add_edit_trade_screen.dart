@@ -270,6 +270,12 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            _label(AppStrings.realDevicePhotos.tr(context)),
+            DeviceImagePicker(
+              imagePaths: _imagePaths,
+              onChanged: (paths) => setState(() => _imagePaths = paths),
+            ),
+            const SizedBox(height: 16),
             CustomDropDownMenu(
               label: AppStrings.deviceType.tr(context),
               hint: AppStrings.selectDeviceType.tr(context),
@@ -283,12 +289,6 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
                   : (v) {
                       setState(() => _deviceType = v);
                     },
-            ),
-            const SizedBox(height: 16),
-            _label(AppStrings.realDevicePhotos.tr(context)),
-            DeviceImagePicker(
-              imagePaths: _imagePaths,
-              onChanged: (paths) => setState(() => _imagePaths = paths),
             ),
             const SizedBox(height: 16),
             Row(

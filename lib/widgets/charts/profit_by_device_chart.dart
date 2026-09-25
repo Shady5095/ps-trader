@@ -23,15 +23,16 @@ class ProfitByDeviceChart extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final chartWidth = (data.length * 64.0).clamp(constraints.maxWidth, double.infinity);
+        final chartWidth = (data.length * 100.0).clamp(constraints.maxWidth, double.infinity);
         return SizedBox(
-          height: 240,
+          height: 270,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
               width: chartWidth,
               child: BarChart(
                 BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
                   maxY: maxY,
                   gridData: FlGridData(
                     show: true,
@@ -59,7 +60,7 @@ class ProfitByDeviceChart extends StatelessWidget {
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 40,
+                        reservedSize: 58,
                         getTitlesWidget: (value, meta) {
                           final idx = value.toInt();
                           if (idx < 0 || idx >= data.length) {
@@ -67,14 +68,20 @@ class ProfitByDeviceChart extends StatelessWidget {
                           }
                           final label = data[idx].deviceType;
                           return Padding(
-                            padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                              label.length > 10
-                                  ? '${label.substring(0, 9)}…'
-                                  : label,
-                              style: const TextStyle(
-                                  color: AppColors.textSecondary, fontSize: 9.5),
-                              textAlign: TextAlign.center,
+                            padding: const EdgeInsets.only(top: 8),
+                            child: SizedBox(
+                              width: 68,
+                              child: Text(
+                                label,
+                                maxLines: 3,
+                                softWrap: true,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 10,
+                                  height: 1.25,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           );
                         },
@@ -84,12 +91,14 @@ class ProfitByDeviceChart extends StatelessWidget {
                   barTouchData: BarTouchData(
                     touchTooltipData: BarTouchTooltipData(
                       tooltipBgColor: AppColors.surfaceAlt,
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) =>
-                          BarTooltipItem(
-                        '${intl.NumberFormat('#,##0').format(rod.toY)} ج.م',
-                        const TextStyle(
-                            color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-                      ),
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        final deviceName = data[group.x].deviceType;
+                        return BarTooltipItem(
+                          '$deviceName\n${intl.NumberFormat('#,##0').format(rod.toY)} ج.م',
+                          const TextStyle(
+                              color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+                        );
+                      },
                     ),
                   ),
                   barGroups: [

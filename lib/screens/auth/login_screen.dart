@@ -16,16 +16,23 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _fullNameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _confirmPasswordCtrl = TextEditingController();
+
+  bool _isSignUp = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    _fullNameCtrl.addListener(_onFieldChanged);
     _emailCtrl.addListener(_onFieldChanged);
     _passwordCtrl.addListener(_onFieldChanged);
+    _confirmPasswordCtrl.addListener(_onFieldChanged);
   }
 
   void _onFieldChanged() {
@@ -36,18 +43,37 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+    _fullNameCtrl.dispose();
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _confirmPasswordCtrl.dispose();
     super.dispose();
   }
 
-  void _signInWithEmail() {
+  void _toggleMode() {
+    setState(() {
+      _isSignUp = !_isSignUp;
+      _errorMessage = null;
+      _formKey.currentState?.reset();
+    });
+  }
+
+  void _submitEmailAuth() {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _errorMessage = null);
-    context.read<AuthCubit>().signInWithEmail(
-          email: _emailCtrl.text.trim(),
-          password: _passwordCtrl.text,
-        );
+
+    if (_isSignUp) {
+      context.read<AuthCubit>().signUpWithEmail(
+            fullName: _fullNameCtrl.text.trim(),
+            email: _emailCtrl.text.trim(),
+            password: _passwordCtrl.text,
+          );
+    } else {
+      context.read<AuthCubit>().signInWithEmail(
+            email: _emailCtrl.text.trim(),
+            password: _passwordCtrl.text,
+          );
+    }
   }
 
   void _signInWithGoogle() {
@@ -157,7 +183,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          AppStrings.loginSubtitle.tr(context),
+                          _isSignUp
+                              ? AppStrings.createAccount.tr(context)
+                              : AppStrings.loginSubtitle.tr(context),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 13,
@@ -204,6 +232,36 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 20),
                         ],
 
+                        // Full Name Field (Sign Up Only)
+                        if (_isSignUp) ...[
+                          Text(
+                            AppStrings.fullName.tr(context),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _fullNameCtrl,
+                            keyboardType: TextInputType.name,
+                            enabled: !isLoading,
+                            decoration: InputDecoration(
+                              hintText: AppStrings.fullNameHint.tr(context),
+                              prefixIcon: const Icon(Icons.person_outline_rounded,
+                                  color: AppColors.textSecondary),
+                            ),
+                            validator: (val) {
+                              if (val == null || val.trim().isEmpty) {
+                                return AppStrings.fullNameRequired.tr(context);
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 18),
+                        ],
+
                         // Email Field
                         Text(
                           AppStrings.email.tr(context),
@@ -229,7 +287,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (val == null || val.trim().isEmpty) {
                               return AppStrings.emailRequired.tr(context);
                             }
-                            if (!val.contains('@') || !val.contains('.')) {
+                            final emailRegex = RegExp(
+                                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+                            if (!emailRegex.hasMatch(val.trim())) {
                               return AppStrings.emailInvalid.tr(context);
                             }
                             return null;
@@ -280,11 +340,61 @@ class _LoginScreenState extends State<LoginScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 18),
 
-                        // Email Sign-in Button
+                        // Confirm Password Field (Sign Up Only)
+                        if (_isSignUp) ...[
+                          Text(
+                            AppStrings.confirmPassword.tr(context),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _confirmPasswordCtrl,
+                            obscureText: _obscureConfirmPassword,
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.left,
+                            enabled: !isLoading,
+                            decoration: InputDecoration(
+                              hintText: '••••••••',
+                              prefixIcon: const Icon(Icons.lock_reset_rounded,
+                                  color: AppColors.textSecondary),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureConfirmPassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: AppColors.textSecondary,
+                                ),
+                                onPressed: () {
+                                  setState(() => _obscureConfirmPassword =
+                                      !_obscureConfirmPassword);
+                                },
+                              ),
+                            ),
+                            validator: (val) {
+                              if (val == null || val.isEmpty) {
+                                return AppStrings.confirmPasswordRequired
+                                    .tr(context);
+                              }
+                              if (val != _passwordCtrl.text) {
+                                return AppStrings.passwordsDoNotMatch
+                                    .tr(context);
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 24),
+                        ] else
+                          const SizedBox(height: 6),
+
+                        // Email Sign-in / Sign-up Button
                         ElevatedButton(
-                          onPressed: isLoading ? null : _signInWithEmail,
+                          onPressed: isLoading ? null : _submitEmailAuth,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
@@ -301,14 +411,34 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 )
                               : Text(
-                                  AppStrings.signIn.tr(context),
+                                  _isSignUp
+                                      ? AppStrings.signUp.tr(context)
+                                      : AppStrings.signIn.tr(context),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
+
+                        // Toggle Mode Button (Switch between Sign In and Create Account)
+                        TextButton(
+                          onPressed: isLoading ? null : _toggleMode,
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.primaryLight,
+                            textStyle: const TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          child: Text(
+                            _isSignUp
+                                ? AppStrings.haveAccount.tr(context)
+                                : AppStrings.dontHaveAccount.tr(context),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
 
                         // Divider "or"
                         Row(
@@ -346,17 +476,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.g_mobiledata,
-                                  color: Colors.redAccent,
-                                  size: 20,
-                                ),
+                              Image.asset(
+                                'assets/images/google_icon.png',
+                                width: 22,
+                                height: 22,
                               ),
                               const SizedBox(width: 10),
                               Text(
@@ -370,36 +493,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 28),
-
-                        // Help note
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceAlt.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: AppColors.border.withValues(alpha: 0.5),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.info_outline,
-                                  color: AppColors.primary, size: 18),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  AppStrings.authHelpNote.tr(context),
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary,
-                                    height: 1.4,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),

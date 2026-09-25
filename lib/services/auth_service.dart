@@ -41,6 +41,23 @@ class AuthService {
     );
   }
 
+  /// إنشاء حساب جديد بالبريد الإلكتروني وكلمة المرور والاسم الكامل
+  Future<UserCredential> signUpWithEmailAndPassword({
+    required String fullName,
+    required String email,
+    required String password,
+  }) async {
+    final credential = await _auth.createUserWithEmailAndPassword(
+      email: email.trim(),
+      password: password,
+    );
+    if (fullName.trim().isNotEmpty && credential.user != null) {
+      await credential.user!.updateDisplayName(fullName.trim());
+      await credential.user!.reload();
+    }
+    return credential;
+  }
+
   /// تسجيل الدخول باستخدام حساب Google
   Future<UserCredential?> signInWithGoogle() async {
     try {
@@ -111,6 +128,10 @@ class AuthService {
           return 'تعذر الاتصال بالإنترنت، يرجى التحقق من الشبكة.';
         case 'account-exists-with-different-credential':
           return 'يوجد حساب مسجل بالفعل ببيانات اعتماد مختلفة لهذا البريد.';
+        case 'email-already-in-use':
+          return 'البريد الإلكتروني مسجل بالفعل بحساب آخر.';
+        case 'weak-password':
+          return 'كلمة المرور ضعيفة، يرجى اختيار كلمة مرور أقوى (6 خانات على الأقل).';
         default:
           return error.message ?? 'حدث خطأ أثناء المصادقة، يرجى المحاولة لاحقاً.';
       }

@@ -18,10 +18,7 @@ class DeviceImagePicker extends StatelessWidget {
   Future<void> _pick(BuildContext context, ImageSource source) async {
     final picker = ImagePicker();
     if (source == ImageSource.gallery) {
-      final files = await picker.pickMultiImage(
-        maxWidth: 1200,
-        imageQuality: 82,
-      );
+      final files = await picker.pickMultiImage();
       if (files.isNotEmpty) {
         final newPaths = files.map((f) => f.path).toList();
         onChanged([...imagePaths, ...newPaths]);
