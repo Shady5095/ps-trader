@@ -1,7 +1,7 @@
 name: ps_trades_app
 description: تطبيق إدارة تجارة أجهزة PS5 - متابعة الشراء والبيع والأرباح
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -41,8 +41,8 @@ dependencies:
   flutter_svg: ^2.0.9
 
   # Share / export
-  share_plus: ^13.3.0
-  syncfusion_flutter_xlsio: ^34.2.8
+  share_plus: 12.0.2
+  syncfusion_flutter_xlsio: ^33.2.13
   firebase_core: ^4.15.0
   firebase_auth: ^6.7.0
   cloud_firestore: ^6.10.0
@@ -51,10 +51,15 @@ dependencies:
   shared_preferences: ^2.5.5
   flutter_native_splash: ^2.4.8
   mobile_scanner: ^7.4.2
-  file_saver: ^0.4.0
-  url_launcher: ^6.3.3
-  lottie: ^3.6.1
-  audioplayers: ^6.8.1
+  file_saver: 0.2.14
+  url_launcher: 6.3.1
+  lottie: 3.3.3
+  audioplayers: 6.1.2
+  sign_in_with_apple: ^7.0.1
+  crypto: ^3.0.7
+
+dependency_overrides:
+  meta: 1.16.0
 
 dev_dependencies:
   flutter_test:
