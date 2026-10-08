@@ -584,5 +584,18 @@
   "fullNameHint": "Full Name (e.g. John Doe)",
   "fullNameRequired": "Please enter your full name",
   "confirmPasswordRequired": "Please confirm your password",
-  "passwordsDoNotMatch": "Passwords do not match"
+  "passwordsDoNotMatch": "Passwords do not match",
+  "copiedToClipboard": "Copied to clipboard successfully",
+  "callNumber": "Call",
+  "openWhatsApp": "Chat on WhatsApp",
+  "congratulations": "Congratulations",
+  "deviceSoldSuccess": "You have sold this device successfully",
+  "yourProfitIs": "Your profit is",
+  "backToHome": "Back to home",
+  "expenses": "Expenses",
+  "expensesHint": "Maintenance, transportation, ads...",
+  "deleteAccountAndDevices": "Delete Account and All Devices",
+  "deleteAccountWarning": "Warning: This account and all registered devices will be permanently deleted. This action cannot be undone.",
+  "deleteAccountInstruction": "To confirm deletion, type 'delete' below:",
+  "accountDeletedSuccess": "Account and all devices deleted successfully"
 }

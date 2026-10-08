@@ -281,6 +281,42 @@ void main() {
       expect(updated.buyerNumber, '01222222222');
       expect(updated.sellDate, DateTime(2026, 2, 15));
     });
+
+    test('Trade expenses are deducted from profit and properly serialized', () {
+      final trade = Trade(
+        id: 't-exp',
+        deviceType: 'PS5 Digital',
+        purchasePrice: 18000,
+        purchaseDate: DateTime(2026, 3, 1),
+        sellerNumber: '01011111111',
+        sellerLocation: 'Alex',
+        gamesIncluded: '',
+        notes: '',
+        controllers: 1,
+        gamesCount: 0,
+        status: TradeStatus.sold,
+        deviceSellPrice: 22000,
+        accessoriesSellPrice: 1000,
+        expenses: 500,
+        sellDate: DateTime(2026, 3, 10),
+        buyerNumber: '01022222222',
+      );
+
+      expect(trade.sellPrice, 23000);
+      expect(trade.expenses, 500);
+      expect(trade.profit, 4500);
+
+      final map = trade.toMap();
+      expect(map['expenses'], 500);
+
+      final fromMap = Trade.fromMap(map);
+      expect(fromMap.expenses, 500);
+      expect(fromMap.profit, 4500);
+
+      final updated = trade.copyWith(expenses: 700);
+      expect(updated.expenses, 700);
+      expect(updated.profit, 4300);
+    });
   });
 
   testWidgets('TradeCard renders with device asset image',
@@ -413,6 +449,7 @@ void main() {
 
     expect(find.text('لغة التطبيق'), findsOneWidget);
     expect(find.text('تسجيل الخروج'), findsOneWidget);
+    expect(find.text('حذف الحساب وجميع الأجهزة'), findsOneWidget);
     expect(find.text('الإعدادات'), findsOneWidget);
   });
 
@@ -458,6 +495,7 @@ class _MoreScreenTestWidget extends StatelessWidget {
         Text(AppStrings.settings.tr(context)),
         Text(AppStrings.appLanguage.tr(context)),
         Text(AppStrings.logout.tr(context)),
+        Text(AppStrings.deleteAccountAndDevices.tr(context)),
       ],
     );
   }

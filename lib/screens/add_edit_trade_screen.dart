@@ -49,6 +49,7 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
 
   late final TextEditingController _deviceSellPriceCtrl;
   late final TextEditingController _accessoriesSellPriceCtrl;
+  late final TextEditingController _expensesCtrl;
   late final TextEditingController _buyerNumberCtrl;
   String? _sellingPlatform;
   DateTime? _sellDate;
@@ -92,6 +93,13 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
           ? (e?.accessoriesSellPrice?.toStringAsFixed(0) ?? '0')
           : '0',
     );
+    _expensesCtrl = TextEditingController(
+      text: isSold
+          ? (e?.expenses != null && e!.expenses > 0
+              ? e.expenses.toStringAsFixed(0)
+              : '0')
+          : '0',
+    );
     _buyerNumberCtrl = TextEditingController(
       text: isSold ? (e?.buyerNumber ?? '') : '',
     );
@@ -114,6 +122,7 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
     _warrantyMonthsCtrl.dispose();
     _deviceSellPriceCtrl.dispose();
     _accessoriesSellPriceCtrl.dispose();
+    _expensesCtrl.dispose();
     _buyerNumberCtrl.dispose();
     super.dispose();
   }
@@ -212,6 +221,9 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
           deviceSellPrice: devSell,
           accessoriesSellPrice: accSell,
           sellPrice: totalSell,
+          expenses: isSold
+              ? (double.tryParse(_expensesCtrl.text) ?? 0.0)
+              : widget.existing!.expenses,
           buyerNumber: isSold
               ? _buyerNumberCtrl.text.trim()
               : widget.existing?.buyerNumber,
@@ -507,6 +519,9 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                   labelText: AppStrings.sellerNumber.tr(context)),
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? AppStrings.fieldRequired.tr(context)
+                  : null,
             ),
             const SizedBox(height: 16),
             Container(
@@ -640,6 +655,11 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
                 ],
               ),
               const SizedBox(height: 16),
+              _numberField(
+                controller: _expensesCtrl,
+                label: AppStrings.expenses.tr(context),
+              ),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -694,6 +714,13 @@ class _AddEditTradeScreenState extends State<AddEditTradeScreen> {
                 decoration: InputDecoration(
                   labelText: AppStrings.buyerNumber.tr(context),
                 ),
+                validator: (v) {
+                  if (widget.existing?.status == TradeStatus.sold &&
+                      (v == null || v.trim().isEmpty)) {
+                    return AppStrings.fieldRequired.tr(context);
+                  }
+                  return null;
+                },
               ),
             ],
             const SizedBox(height: 28),

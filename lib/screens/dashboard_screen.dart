@@ -20,14 +20,21 @@ import 'more_screen.dart';
 import 'trades_list_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final int initialTab;
+  const DashboardScreen({super.key, this.initialTab = 0});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _tab = 0;
+  late int _tab;
+
+  @override
+  void initState() {
+    super.initState();
+    _tab = widget.initialTab;
+  }
 
   @override
   Widget build(BuildContext context) {

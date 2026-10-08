@@ -92,6 +92,17 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  Future<void> deleteAccountAndData() async {
+    emit(const AuthLoading());
+    try {
+      await _authService.deleteAccountAndData();
+      emit(const Unauthenticated());
+    } catch (e) {
+      emit(AuthFailure(AuthService.getErrorMessage(e)));
+      rethrow;
+    }
+  }
+
   @override
   Future<void> close() {
     _authSubscription?.cancel();

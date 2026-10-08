@@ -582,5 +582,18 @@
   "fullNameHint": "الاسم بالكامل (مثال: أحمد محمد)",
   "fullNameRequired": "يرجى إدخال الاسم بالكامل",
   "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
-  "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين"
+  "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين",
+  "copiedToClipboard": "تم النسخ إلى الحافظة بنجاح",
+  "callNumber": "اتصال",
+  "openWhatsApp": "مراسلة عبر واتساب",
+  "congratulations": "Congratulations",
+  "deviceSoldSuccess": "You have sold this device successfully",
+  "yourProfitIs": "Your profit is",
+  "backToHome": "Back to home",
+  "expenses": "المصاريف (Expenses)",
+  "expensesHint": "صيانة، مواصلات، إعلانات...",
+  "deleteAccountAndDevices": "حذف الحساب وجميع الأجهزة",
+  "deleteAccountWarning": "تحذير: سيتم حذف هذا الحساب وجميع الأجهزة والبيانات المسجلة عليه نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+  "deleteAccountInstruction": "لتأكيد الحذف، اكتب كلمة delete أدناه:",
+  "accountDeletedSuccess": "تم حذف الحساب وجميع الأجهزة بنجاح"
 }

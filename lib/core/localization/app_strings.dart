@@ -211,4 +211,25 @@ class AppStrings {
   static const String fullNameRequired = 'fullNameRequired';
   static const String confirmPasswordRequired = 'confirmPasswordRequired';
   static const String passwordsDoNotMatch = 'passwordsDoNotMatch';
+
+  /// Actions
+  static const String copiedToClipboard = 'copiedToClipboard';
+  static const String callNumber = 'callNumber';
+  static const String openWhatsApp = 'openWhatsApp';
+
+  /// Sale Celebration Screen
+  static const String congratulations = 'congratulations';
+  static const String deviceSoldSuccess = 'deviceSoldSuccess';
+  static const String yourProfitIs = 'yourProfitIs';
+  static const String backToHome = 'backToHome';
+
+  /// Expenses
+  static const String expenses = 'expenses';
+  static const String expensesHint = 'expensesHint';
+
+  /// Delete Account
+  static const String deleteAccountAndDevices = 'deleteAccountAndDevices';
+  static const String deleteAccountWarning = 'deleteAccountWarning';
+  static const String deleteAccountInstruction = 'deleteAccountInstruction';
+  static const String accountDeletedSuccess = 'accountDeletedSuccess';
 }

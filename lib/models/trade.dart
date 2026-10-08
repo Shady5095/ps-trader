@@ -35,6 +35,7 @@ class Trade {
   final double? sellPrice;
   final DateTime? sellDate;
   final String? buyerNumber;
+  final double expenses;
   final TradeStatus status;
   final List<String> imagePaths;
   final List<TradeGame> games;
@@ -63,6 +64,7 @@ class Trade {
     double? deviceSellPrice,
     double? accessoriesSellPrice,
     double? sellPrice,
+    this.expenses = 0.0,
     this.sellDate,
     this.buyerNumber,
     required this.status,
@@ -81,12 +83,12 @@ class Trade {
 
   double? get profit {
     if (sellPrice == null) return null;
-    return sellPrice! - purchasePrice;
+    return sellPrice! - purchasePrice - expenses;
   }
 
   double? get profitMargin {
-    if (profit == null || purchasePrice <= 0) return null;
-    return (profit! / purchasePrice) * 100;
+    if (profit == null || (purchasePrice + expenses) <= 0) return null;
+    return (profit! / (purchasePrice + expenses)) * 100;
   }
 
   Trade copyWith({
@@ -109,6 +111,7 @@ class Trade {
     double? deviceSellPrice,
     double? accessoriesSellPrice,
     double? sellPrice,
+    double? expenses,
     DateTime? sellDate,
     String? buyerNumber,
     TradeStatus? status,
@@ -117,6 +120,7 @@ class Trade {
     List<TradeGame>? games,
     int? conditionRating,
     bool clearSellPrice = false,
+    bool clearExpenses = false,
     bool clearSellDate = false,
     bool clearBuyerNumber = false,
     bool clearImage = false,
@@ -166,6 +170,7 @@ class Trade {
       deviceSellPrice: newDeviceSellPrice,
       accessoriesSellPrice: newAccSellPrice,
       sellPrice: newSellPrice,
+      expenses: clearSellPrice || clearExpenses ? 0.0 : (expenses ?? this.expenses),
       sellDate: clearSellDate ? null : (sellDate ?? this.sellDate),
       buyerNumber: clearBuyerNumber ? null : (buyerNumber ?? this.buyerNumber),
       status: status ?? this.status,
@@ -197,6 +202,7 @@ class Trade {
       'deviceSellPrice': deviceSellPrice,
       'accessoriesSellPrice': accessoriesSellPrice,
       'sellPrice': sellPrice,
+      'expenses': expenses,
       'sellDate': sellDate?.toIso8601String(),
       'buyerNumber': buyerNumber,
       'status': status.toDb,
@@ -274,6 +280,7 @@ class Trade {
       deviceSellPrice: rawDeviceSellPrice,
       accessoriesSellPrice: rawAccSellPrice,
       sellPrice: rawSellPrice,
+      expenses: (map['expenses'] as num?)?.toDouble() ?? 0.0,
       sellDate: map['sellDate'] != null
           ? DateTime.parse(map['sellDate'] as String)
           : null,

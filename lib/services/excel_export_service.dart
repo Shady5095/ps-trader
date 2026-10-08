@@ -55,6 +55,7 @@ class ExcelExportService {
       'Serial No',
       'Purchase Platform',
       'Selling Platform',
+      'Expenses',
       'Profit',
       'Status',
     ];
@@ -254,11 +255,14 @@ class ExcelExportService {
       // 19. Selling Platform
       _setText(sheet, r, 19, t.sellingPlatform != null && t.sellingPlatform!.isNotEmpty ? t.sellingPlatform! : '—', styleCenter);
 
-      // 20. Profit (e.g. 5,000 EGP)
-      _setText(sheet, r, 20, isSold ? formatMoney(t.profit) : '—', styleRight);
+      // 20. Expenses
+      _setText(sheet, r, 20, isSold && t.expenses > 0 ? formatMoney(t.expenses) : (isSold ? '0 EGP' : '—'), styleRight);
 
-      // 21. Status (SOLD / IN STOCK)
-      _setText(sheet, r, 21, isSold ? 'SOLD' : 'IN STOCK', styleStatus);
+      // 21. Profit (e.g. 5,000 EGP)
+      _setText(sheet, r, 21, isSold ? formatMoney(t.profit) : '—', styleRight);
+
+      // 22. Status (SOLD / IN STOCK)
+      _setText(sheet, r, 22, isSold ? 'SOLD' : 'IN STOCK', styleStatus);
 
       sheet.setRowHeightInPixels(r, 22);
     }
