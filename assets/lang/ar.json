@@ -581,5 +581,14 @@
   "fullNameHint": "الاسم بالكامل (مثال: أحمد محمد)",
   "fullNameRequired": "يرجى إدخال الاسم بالكامل",
   "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
-  "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين"
+  "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين",
+  "copiedToClipboard": "تم النسخ إلى الحافظة بنجاح",
+  "callNumber": "اتصال",
+  "openWhatsApp": "مراسلة عبر واتساب",
+  "congratulations": "Congratulations",
+  "deviceSoldSuccess": "You have sold this device successfully",
+  "yourProfitIs": "Your profit is",
+  "backToHome": "Back to home",
+  "expenses": "المصاريف (Expenses)",
+  "expensesHint": "صيانة، مواصلات، إعلانات..."
 }

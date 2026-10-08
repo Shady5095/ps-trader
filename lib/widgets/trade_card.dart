@@ -76,9 +76,16 @@ class TradeCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(
-                      height: 3,
+                    const SizedBox(height: 2),
+                    Text(
+                      intl.DateFormat('yyyy/MM/dd').format(trade.purchaseDate),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
+                    const SizedBox(height: 3),
                     Row(
                       children: [
                         Expanded(

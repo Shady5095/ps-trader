@@ -34,6 +34,7 @@ class DatabaseHelper {
             gamesIncluded TEXT,
             notes TEXT,
             sellPrice REAL,
+            expenses REAL,
             sellDate TEXT,
             buyerNumber TEXT,
             status TEXT NOT NULL,

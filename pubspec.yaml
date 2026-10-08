@@ -52,6 +52,9 @@ dependencies:
   flutter_native_splash: ^2.4.8
   mobile_scanner: ^7.4.2
   file_saver: ^0.4.0
+  url_launcher: ^6.3.3
+  lottie: ^3.6.1
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +66,8 @@ flutter:
   assets:
     - assets/images/
     - assets/lang/
+    - assets/audio/
+    - assets/lottie/
 
 flutter_native_splash:
   color: "#0B0E17"

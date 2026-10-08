@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:url_launcher/url_launcher.dart';
 import '../core/localization/app_locale.dart';
 import '../core/localization/app_strings.dart';
 import '../cubits/trades/trades_cubit.dart';
@@ -16,6 +18,7 @@ import '../widgets/game_card_item.dart';
 import '../widgets/game_search_bottom_sheet.dart';
 import '../widgets/star_rating_widget.dart';
 import 'add_edit_trade_screen.dart';
+import 'sale_celebration_screen.dart';
 
 class TradeDetailScreen extends StatelessWidget {
   final Trade trade;
@@ -158,11 +161,13 @@ class TradeDetailScreen extends StatelessWidget {
                       ? '—'
                       : currentTrade.sellerLocation),
               const Divider(color: AppColors.border),
-              _row(
-                  AppStrings.sellerNumber.tr(context),
-                  currentTrade.sellerNumber.isEmpty
-                      ? '—'
-                      : currentTrade.sellerNumber),
+              _phoneRow(
+                context,
+                label: AppStrings.sellerNumber.tr(context),
+                phoneNumber: currentTrade.sellerNumber.isEmpty
+                    ? '—'
+                    : currentTrade.sellerNumber,
+              ),
               if (currentTrade.purchasePlatform.isNotEmpty) ...[
                 const Divider(color: AppColors.border),
                 _row(AppStrings.purchasePlatform.tr(context),
@@ -170,8 +175,11 @@ class TradeDetailScreen extends StatelessWidget {
               ],
               if (currentTrade.serialNumber.isNotEmpty) ...[
                 const Divider(color: AppColors.border),
-                _row(AppStrings.serialNumber.tr(context),
-                    currentTrade.serialNumber),
+                _copyableRow(
+                  context,
+                  label: AppStrings.serialNumber.tr(context),
+                  value: currentTrade.serialNumber,
+                ),
               ],
               if (currentTrade.notes.isNotEmpty) ...[
                 const Divider(color: AppColors.border),
@@ -199,6 +207,14 @@ class TradeDetailScreen extends StatelessWidget {
                 _row(AppStrings.totalSellPrice.tr(context),
                     '${currency.format(currentTrade.sellPrice ?? 0)} ${AppStrings.egp.tr(context)}',
                     valueColor: AppColors.accent),
+                if (currentTrade.expenses > 0) ...[
+                  const Divider(color: AppColors.border),
+                  _row(
+                    AppStrings.expenses.tr(context),
+                    '-${currency.format(currentTrade.expenses)} ${AppStrings.egp.tr(context)}',
+                    valueColor: AppColors.danger,
+                  ),
+                ],
                 const Divider(color: AppColors.border),
                 _pairRow(
                   label1: AppStrings.netProfit.tr(context),
@@ -256,11 +272,13 @@ class TradeDetailScreen extends StatelessWidget {
                   ),
                 ],
                 const Divider(color: AppColors.border),
-                _row(
-                    AppStrings.buyerNumber.tr(context),
-                    currentTrade.buyerNumber?.isEmpty ?? true
-                        ? '—'
-                        : currentTrade.buyerNumber!),
+                _phoneRow(
+                  context,
+                  label: AppStrings.buyerNumber.tr(context),
+                  phoneNumber: currentTrade.buyerNumber?.isEmpty ?? true
+                      ? '—'
+                      : currentTrade.buyerNumber!,
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -314,6 +332,192 @@ class TradeDetailScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _copyToClipboard(BuildContext context, String text) {
+    if (text.isEmpty || text == '—') return;
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '${AppStrings.copiedToClipboard.tr(context)}: $text',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final cleaned = phoneNumber.replaceAll(RegExp(r'[\s\-]'), '');
+    final uri = Uri(scheme: 'tel', path: cleaned);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  Future<void> _openWhatsApp(String phoneNumber) async {
+    var cleaned = phoneNumber.replaceAll(RegExp(r'[\s\-+]'), '');
+    if (cleaned.startsWith('01') && cleaned.length == 11) {
+      cleaned = '2$cleaned';
+    }
+    final uri = Uri.parse('https://wa.me/$cleaned');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Widget _copyableRow(
+    BuildContext context, {
+    required String label,
+    required String value,
+  }) {
+    final hasValue = value.isNotEmpty && value != '—';
+
+    return InkWell(
+      onTap: hasValue ? () => _copyToClipboard(context, value) : null,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      value,
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13.5,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  if (hasValue) ...[
+                    const SizedBox(width: 8),
+                    const Icon(
+                      Icons.copy_rounded,
+                      size: 16,
+                      color: AppColors.primaryLight,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _phoneRow(
+    BuildContext context, {
+    required String label,
+    required String phoneNumber,
+  }) {
+    final hasNumber = phoneNumber.isNotEmpty && phoneNumber != '—';
+
+    return InkWell(
+      onTap: hasNumber ? () => _copyToClipboard(context, phoneNumber) : null,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      phoneNumber,
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13.5,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  if (hasNumber) ...[
+                    const SizedBox(width: 8),
+                    // Dial button
+                    InkWell(
+                      onTap: () => _makePhoneCall(phoneNumber),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.phone_in_talk_rounded,
+                          size: 16,
+                          color: AppColors.accent,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    // WhatsApp button
+                    InkWell(
+                      onTap: () => _openWhatsApp(phoneNumber),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF25D366).withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Image.asset(
+                          'assets/images/whatsapp.png',
+                          width: 18,
+                          height: 18,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -459,11 +663,18 @@ class TradeDetailScreen extends StatelessWidget {
   }
 
   void _showMarkAsSoldSheet(BuildContext context, Trade currentTrade) {
+    final formKey = GlobalKey<FormState>();
     final deviceSellPriceCtrl = TextEditingController();
     final accessoriesSellPriceCtrl = TextEditingController(text: '0');
+    final expensesCtrl = TextEditingController(
+      text: currentTrade.expenses > 0
+          ? currentTrade.expenses.toStringAsFixed(0)
+          : '0',
+    );
     final buyerNumberCtrl = TextEditingController();
     String sellingPlatform = currentTrade.sellingPlatform ?? 'Marketplace';
     DateTime sellDate = DateTime.now();
+    bool autoValidate = false;
 
     showModalBottomSheet(
       context: context,
@@ -476,7 +687,9 @@ class TradeDetailScreen extends StatelessWidget {
         builder: (ctx, setSheetState) {
           final devP = double.tryParse(deviceSellPriceCtrl.text) ?? 0.0;
           final accP = double.tryParse(accessoriesSellPriceCtrl.text) ?? 0.0;
+          final expP = double.tryParse(expensesCtrl.text) ?? 0.0;
           final totalSell = devP + accP;
+          final estimatedProfit = totalSell - currentTrade.purchasePrice - expP;
           final currency = intl.NumberFormat('#,##0');
 
           return Padding(
@@ -487,144 +700,240 @@ class TradeDetailScreen extends StatelessWidget {
               bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
             ),
             child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(AppStrings.recordSale.tr(ctx),
-                      style: const TextStyle(
-                          fontSize: 17, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: deviceSellPriceCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          decoration: InputDecoration(
-                              labelText: AppStrings.deviceSellPrice.tr(ctx)),
-                          onChanged: (_) => setSheetState(() {}),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: accessoriesSellPriceCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          decoration: InputDecoration(
-                              labelText:
-                                  AppStrings.accessoriesSellPrice.tr(ctx)),
-                          onChanged: (_) => setSheetState(() {}),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceAlt,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Form(
+                key: formKey,
+                autovalidateMode: autoValidate
+                    ? AutovalidateMode.onUserInteraction
+                    : AutovalidateMode.disabled,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(AppStrings.recordSale.tr(ctx),
+                        style: const TextStyle(
+                            fontSize: 17, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 16),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          AppStrings.totalSellPrice.tr(ctx),
-                          style: const TextStyle(
-                              fontSize: 13, color: AppColors.textSecondary),
+                        Expanded(
+                          child: TextFormField(
+                            controller: deviceSellPriceCtrl,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: InputDecoration(
+                                labelText: AppStrings.deviceSellPrice.tr(ctx)),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return AppStrings.fieldRequired.tr(ctx);
+                              }
+                              final val = double.tryParse(v.trim());
+                              if (val == null || val <= 0) {
+                                return AppStrings.fieldRequired.tr(ctx);
+                              }
+                              return null;
+                            },
+                            onChanged: (_) => setSheetState(() {}),
+                          ),
                         ),
-                        Text(
-                          '${currency.format(totalSell)} ${AppStrings.egp.tr(ctx)}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.accent,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextFormField(
+                            controller: accessoriesSellPriceCtrl,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: InputDecoration(
+                                labelText:
+                                    AppStrings.accessoriesSellPrice.tr(ctx)),
+                            onChanged: (_) => setSheetState(() {}),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  CustomDropDownMenu(
-                    label: AppStrings.sellingPlatform.tr(ctx),
-                    value: sellingPlatform,
-                    dropdownItems: DeviceCatalog.platforms,
-                    onChanged: (v) {
-                      if (v != null) {
-                        setSheetState(() => sellingPlatform = v);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: buyerNumberCtrl,
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                        labelText: AppStrings.buyerNumber.tr(ctx)),
-                  ),
-                  const SizedBox(height: 12),
-                  InkWell(
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: ctx,
-                        initialDate: sellDate,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null) {
-                        setSheetState(() => sellDate = picked);
-                      }
-                    },
-                    child: InputDecorator(
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: expensesCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true),
                       decoration: InputDecoration(
-                          labelText: AppStrings.sellDate.tr(ctx)),
-                      child: Text(
-                          intl.DateFormat('yyyy/MM/dd').format(sellDate)),
+                        labelText: AppStrings.expenses.tr(ctx),
+                        hintText: AppStrings.expensesHint.tr(ctx),
+                        prefixIcon: const Icon(Icons.receipt_long_outlined,
+                            size: 20),
+                      ),
+                      onChanged: (_) => setSheetState(() {}),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final devPrice =
-                            double.tryParse(deviceSellPriceCtrl.text);
-                        if (devPrice == null || devPrice <= 0) {
-                          ScaffoldMessenger.of(ctx).showSnackBar(
-                            SnackBar(
-                              content: Text(AppStrings.fieldRequired.tr(ctx)),
-                              backgroundColor: AppColors.danger,
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceAlt,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                AppStrings.totalSellPrice.tr(ctx),
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary),
+                              ),
+                              Text(
+                                '${currency.format(totalSell)} ${AppStrings.egp.tr(ctx)}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.accent,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (expP > 0) ...[
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  AppStrings.expenses.tr(ctx),
+                                  style: const TextStyle(
+                                      fontSize: 12.5,
+                                      color: AppColors.textSecondary),
+                                ),
+                                Text(
+                                  '-${currency.format(expP)} ${AppStrings.egp.tr(ctx)}',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.danger,
+                                  ),
+                                ),
+                              ],
                             ),
-                          );
-                          return;
-                        }
-                        final accPrice =
-                            double.tryParse(accessoriesSellPriceCtrl.text) ?? 0.0;
-                        final total = devPrice + accPrice;
-
-                        await ctx.read<TradesCubit>().markAsSold(
-                              currentTrade,
-                              deviceSellPrice: devPrice,
-                              accessoriesSellPrice: accPrice,
-                              sellPrice: total,
-                              sellDate: sellDate,
-                              buyerNumber: buyerNumberCtrl.text.trim(),
-                              sellingPlatform: sellingPlatform,
-                            );
-                        if (ctx.mounted) {
-                          Navigator.pop(ctx);
+                          ],
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                AppStrings.netProfit.tr(ctx),
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary),
+                              ),
+                              Text(
+                                '${currency.format(estimatedProfit)} ${AppStrings.egp.tr(ctx)}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: estimatedProfit >= 0
+                                      ? AppColors.accent
+                                      : AppColors.danger,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    CustomDropDownMenu(
+                      label: AppStrings.sellingPlatform.tr(ctx),
+                      value: sellingPlatform,
+                      dropdownItems: DeviceCatalog.platforms,
+                      onChanged: (v) {
+                        if (v != null) {
+                          setSheetState(() => sellingPlatform = v);
                         }
                       },
-                      child: Text(AppStrings.confirmSale.tr(ctx)),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: buyerNumberCtrl,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                          labelText: AppStrings.buyerNumber.tr(ctx)),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return AppStrings.fieldRequired.tr(ctx);
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    InkWell(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: ctx,
+                          initialDate: sellDate,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          setSheetState(() => sellDate = picked);
+                        }
+                      },
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                            labelText: AppStrings.sellDate.tr(ctx)),
+                        child: Text(
+                            intl.DateFormat('yyyy/MM/dd').format(sellDate)),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          setSheetState(() => autoValidate = true);
+                          if (!formKey.currentState!.validate()) {
+                            return;
+                          }
+
+                          final devPrice =
+                              double.parse(deviceSellPriceCtrl.text.trim());
+                          final accPrice =
+                              double.tryParse(accessoriesSellPriceCtrl.text.trim()) ?? 0.0;
+                          final expPrice =
+                              double.tryParse(expensesCtrl.text.trim()) ?? 0.0;
+                          final total = devPrice + accPrice;
+                          final calculatedProfit =
+                              total - currentTrade.purchasePrice - expPrice;
+
+                          await ctx.read<TradesCubit>().markAsSold(
+                                currentTrade,
+                                deviceSellPrice: devPrice,
+                                accessoriesSellPrice: accPrice,
+                                sellPrice: total,
+                                expenses: expPrice,
+                                sellDate: sellDate,
+                                buyerNumber: buyerNumberCtrl.text.trim(),
+                                sellingPlatform: sellingPlatform,
+                              );
+                          if (ctx.mounted) {
+                            Navigator.pop(ctx); // Close bottom sheet
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => SaleCelebrationScreen(
+                                  profit: calculatedProfit,
+                                  deviceType: currentTrade.deviceType,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: Text(AppStrings.confirmSale.tr(ctx)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );

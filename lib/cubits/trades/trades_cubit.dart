@@ -165,6 +165,7 @@ class TradesCubit extends Cubit<TradesState> {
     required double sellPrice,
     double? deviceSellPrice,
     double? accessoriesSellPrice,
+    double expenses = 0.0,
     required DateTime sellDate,
     required String buyerNumber,
     String? sellingPlatform,
@@ -175,6 +176,7 @@ class TradesCubit extends Cubit<TradesState> {
       'deviceSellPrice': devPrice,
       'accessoriesSellPrice': accPrice,
       'sellPrice': sellPrice,
+      'expenses': expenses,
       'sellDate': sellDate.toIso8601String(),
       'buyerNumber': buyerNumber,
       if (sellingPlatform != null) 'sellingPlatform': sellingPlatform,
@@ -189,6 +191,7 @@ class TradesCubit extends Cubit<TradesState> {
       'deviceSellPrice': null,
       'accessoriesSellPrice': null,
       'sellPrice': null,
+      'expenses': 0.0,
       'sellDate': null,
       'buyerNumber': null,
     });
