@@ -354,6 +354,7 @@
   "yourAccountWasDeleted": "تم حذف حسابك",
   "yourAccountWasDeletedDescription": "تم حذف حسابك بواسطة مدير النظام",
   "signInWithGoogle": "تسجيل الدخول بحساب Google",
+  "signInWithApple": "تسجيل الدخول بحساب Apple",
   "singInWithApple": "تسجيل الدخول بحساب Apple",
   "accountSignedWithAnotherMethod": "هذا البريد مسجل مسبقاً بطريقة أخرى",
   "newUpdateAvailable": "يتوفر تحديث جديد",

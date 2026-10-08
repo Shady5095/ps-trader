@@ -44,6 +44,7 @@ class AppStrings {
   static const String passwordShort = 'passwordShort';
   static const String enterValidEmail = 'enterValidEmail';
   static const String signInWithGoogle = 'signInWithGoogle';
+  static const String signInWithApple = 'signInWithApple';
   static const String or = 'or';
   static const String cancel = 'cancel';
   static const String save = 'save';

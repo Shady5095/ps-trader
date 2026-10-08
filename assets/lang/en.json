@@ -354,6 +354,7 @@
   "yourAccountWasDeleted": "Your Account Was Deleted",
   "yourAccountWasDeletedDescription": "Your account has been deleted by the system administrator. For more information, please contact the administration.",
   "signInWithGoogle": "Sign in with Google",
+  "signInWithApple": "Sign in with Apple",
   "singInWithApple": "Sign in with Apple",
   "accountSignedWithAnotherMethod": "This email address is already registered via regular login, not Google. Please log in using your email address and password.",
   "newUpdateAvailable": "New Update Available",

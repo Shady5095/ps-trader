@@ -521,7 +521,7 @@ class ExcelExportService {
     final savedPath = await FileSaver.instance.saveFile(
       name: fileName,
       bytes: Uint8List.fromList(bytes),
-      fileExtension: 'xlsx',
+      ext: 'xlsx',
       mimeType: MimeType.microsoftExcel,
     );
 

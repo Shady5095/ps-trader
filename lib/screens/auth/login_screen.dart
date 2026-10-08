@@ -81,6 +81,11 @@ class _LoginScreenState extends State<LoginScreen> {
     context.read<AuthCubit>().signInWithGoogle();
   }
 
+  void _signInWithApple() {
+    setState(() => _errorMessage = null);
+    context.read<AuthCubit>().signInWithApple();
+  }
+
   void _showError(String message) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -461,6 +466,42 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                         const SizedBox(height: 20),
+
+                        // Apple Sign-In Button (iOS / macOS)
+                        if (Theme.of(context).platform == TargetPlatform.iOS ||
+                            Theme.of(context).platform == TargetPlatform.macOS) ...[
+                          OutlinedButton(
+                            onPressed: isLoading ? null : _signInWithApple,
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: const BorderSide(color: AppColors.border),
+                              backgroundColor: AppColors.surfaceAlt,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/apple_logo.png',
+                                  width: 22,
+                                  height: 22,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  AppStrings.signInWithApple.tr(context),
+                                  style: const TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
 
                         // Google Sign-In Button
                         OutlinedButton(

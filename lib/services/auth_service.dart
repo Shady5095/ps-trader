@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../config/auth_config.dart';
 
 class AuthService {
@@ -82,6 +86,69 @@ class AuthService {
     }
   }
 
+  /// توليد قيمة nonce عشوائية للأمان مع Apple Sign-In
+  String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
+  }
+
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  /// تسجيل الدخول باستخدام حساب Apple
+  Future<UserCredential?> signInWithApple() async {
+    try {
+      final rawNonce = _generateNonce();
+      final nonce = _sha256ofString(rawNonce);
+
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+      );
+
+      final OAuthCredential credential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+
+      // تحفظ آبل الاسم فقط في أول تسجيل دخول للمستخدم
+      final nameParts = [
+        appleCredential.givenName,
+        appleCredential.familyName,
+      ].where((s) => s != null && s.trim().isNotEmpty).join(' ');
+
+      if (nameParts.isNotEmpty &&
+          (userCredential.user?.displayName == null ||
+              userCredential.user!.displayName!.isEmpty)) {
+        await userCredential.user!.updateDisplayName(nameParts);
+        await userCredential.user!.reload();
+      }
+
+      return userCredential;
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        debugPrint('Apple Sign-In canceled by user');
+        return null;
+      }
+      debugPrint('Error during Apple Sign-In: ${e.message}');
+      rethrow;
+    } catch (e) {
+      debugPrint('Error during Apple Sign-In: $e');
+      rethrow;
+    }
+  }
+
   /// تسجيل الخروج
   Future<void> signOut() async {
     try {
@@ -96,6 +163,13 @@ class AuthService {
 
   /// ترجمة الأخطاء إلى رسائل عربية واضحة
   static String getErrorMessage(dynamic error) {
+    if (error is SignInWithAppleAuthorizationException) {
+      if (error.code == AuthorizationErrorCode.canceled) {
+        return 'تم إلغاء عملية تسجيل الدخول باستخدام Apple.';
+      }
+      return error.message;
+    }
+
     if (error is GoogleSignInException) {
       if (error.code == GoogleSignInExceptionCode.clientConfigurationError ||
           error.description?.contains('serverClientId') == true) {
@@ -132,6 +206,8 @@ class AuthService {
           return 'البريد الإلكتروني مسجل بالفعل بحساب آخر.';
         case 'weak-password':
           return 'كلمة المرور ضعيفة، يرجى اختيار كلمة مرور أقوى (6 خانات على الأقل).';
+        case 'operation-not-allowed':
+          return 'تسجيل الدخول عبر Apple غير مفعّل في لوحة Firebase Console. يرجى تفعيله من قسم Authentication > Sign-in method.';
         default:
           return error.message ?? 'حدث خطأ أثناء المصادقة، يرجى المحاولة لاحقاً.';
       }
