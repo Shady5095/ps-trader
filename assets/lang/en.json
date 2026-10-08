@@ -592,5 +592,9 @@
   "yourProfitIs": "Your profit is",
   "backToHome": "Back to home",
   "expenses": "Expenses",
-  "expensesHint": "Maintenance, transportation, ads..."
+  "expensesHint": "Maintenance, transportation, ads...",
+  "deleteAccountAndDevices": "Delete Account and All Devices",
+  "deleteAccountWarning": "Warning: This account and all registered devices will be permanently deleted. This action cannot be undone.",
+  "deleteAccountInstruction": "To confirm deletion, type 'delete' below:",
+  "accountDeletedSuccess": "Account and all devices deleted successfully"
 }

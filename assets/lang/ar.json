@@ -590,5 +590,9 @@
   "yourProfitIs": "Your profit is",
   "backToHome": "Back to home",
   "expenses": "المصاريف (Expenses)",
-  "expensesHint": "صيانة، مواصلات، إعلانات..."
+  "expensesHint": "صيانة، مواصلات، إعلانات...",
+  "deleteAccountAndDevices": "حذف الحساب وجميع الأجهزة",
+  "deleteAccountWarning": "تحذير: سيتم حذف هذا الحساب وجميع الأجهزة والبيانات المسجلة عليه نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+  "deleteAccountInstruction": "لتأكيد الحذف، اكتب كلمة delete أدناه:",
+  "accountDeletedSuccess": "تم حذف الحساب وجميع الأجهزة بنجاح"
 }

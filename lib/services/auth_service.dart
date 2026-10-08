@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -94,6 +95,46 @@ class AuthService {
     await _auth.signOut();
   }
 
+  /// حذف الحساب وجميع الأجهزة المسجلة لهذا الحساب فقط
+  Future<void> deleteAccountAndData() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    final uid = user.uid;
+
+    // 1. حذف جميع الأجهزة المسجلة للمستخدم فقط من Firestore
+    final snapshot = await FirebaseFirestore.instance
+        .collection('devices')
+        .where('userId', isEqualTo: uid)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final chunks = <List<QueryDocumentSnapshot<Map<String, dynamic>>>>[];
+      for (var i = 0; i < snapshot.docs.length; i += 400) {
+        chunks.add(snapshot.docs.sublist(
+            i, (i + 400 > snapshot.docs.length) ? snapshot.docs.length : i + 400));
+      }
+      for (final chunk in chunks) {
+        final batch = FirebaseFirestore.instance.batch();
+        for (final doc in chunk) {
+          batch.delete(doc.reference);
+        }
+        await batch.commit();
+      }
+    }
+
+    // 2. تسجيل الخروج من Google إن أمكن
+    try {
+      if (!kIsWeb) {
+        await GoogleSignIn.instance.signOut();
+      }
+    } catch (e) {
+      debugPrint('Google signOut warning during account deletion: $e');
+    }
+
+    // 3. حذف الحساب من Firebase Auth
+    await user.delete();
+  }
+
   /// ترجمة الأخطاء إلى رسائل عربية واضحة
   static String getErrorMessage(dynamic error) {
     if (error is GoogleSignInException) {
@@ -132,6 +173,8 @@ class AuthService {
           return 'البريد الإلكتروني مسجل بالفعل بحساب آخر.';
         case 'weak-password':
           return 'كلمة المرور ضعيفة، يرجى اختيار كلمة مرور أقوى (6 خانات على الأقل).';
+        case 'requires-recent-login':
+          return 'لأسباب أمنية، يرجى تسجيل الخروج ثم تسجيل الدخول مرة أخرى لإتمام حذف الحساب.';
         default:
           return error.message ?? 'حدث خطأ أثناء المصادقة، يرجى المحاولة لاحقاً.';
       }

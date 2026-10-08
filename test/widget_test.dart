@@ -449,6 +449,7 @@ void main() {
 
     expect(find.text('لغة التطبيق'), findsOneWidget);
     expect(find.text('تسجيل الخروج'), findsOneWidget);
+    expect(find.text('حذف الحساب وجميع الأجهزة'), findsOneWidget);
     expect(find.text('الإعدادات'), findsOneWidget);
   });
 
@@ -494,6 +495,7 @@ class _MoreScreenTestWidget extends StatelessWidget {
         Text(AppStrings.settings.tr(context)),
         Text(AppStrings.appLanguage.tr(context)),
         Text(AppStrings.logout.tr(context)),
+        Text(AppStrings.deleteAccountAndDevices.tr(context)),
       ],
     );
   }

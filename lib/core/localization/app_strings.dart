@@ -225,4 +225,10 @@ class AppStrings {
   /// Expenses
   static const String expenses = 'expenses';
   static const String expensesHint = 'expensesHint';
+
+  /// Delete Account
+  static const String deleteAccountAndDevices = 'deleteAccountAndDevices';
+  static const String deleteAccountWarning = 'deleteAccountWarning';
+  static const String deleteAccountInstruction = 'deleteAccountInstruction';
+  static const String accountDeletedSuccess = 'accountDeletedSuccess';
 }
