@@ -70,6 +70,19 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  Future<void> signInWithApple() async {
+    emit(const AuthLoading());
+    try {
+      final credential = await _authService.signInWithApple();
+      if (credential == null) {
+        // المستخدم ألغى النافذة
+        emit(const Unauthenticated());
+      }
+    } catch (e) {
+      emit(AuthFailure(AuthService.getErrorMessage(e)));
+    }
+  }
+
   Future<void> signOut() async {
     emit(const AuthLoading());
     try {
