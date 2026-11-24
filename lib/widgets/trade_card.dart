@@ -163,7 +163,7 @@ class _DeviceThumbnail extends StatelessWidget {
         height: 75,
         alignment: Alignment.center,
         child: Image.asset(
-          DeviceCatalog.assetImageFor(trade.deviceType),
+          DeviceCatalog.assetImageFor(trade.deviceType, hasBox: trade.hasBox),
           width: 75,
           height: 75,
           fit: BoxFit.cover,

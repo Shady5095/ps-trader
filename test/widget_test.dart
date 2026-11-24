@@ -131,6 +131,19 @@ void main() {
       expect(DeviceCatalog.assetImageFor('PS5 Pro CD (with Disc Drive) (2TB)'),
           'assets/images/pro.png');
     });
+
+    test('maps all models without box (_no_box) correctly', () {
+      expect(DeviceCatalog.assetImageFor('PS5 Fat CD (825GB)', hasBox: false),
+          'assets/images/fat_cd_no_box.png');
+      expect(DeviceCatalog.assetImageFor('PS5 Fat Digital (825GB)', hasBox: false),
+          'assets/images/fat_digital_no_box.png');
+      expect(DeviceCatalog.assetImageFor('PS5 Slim CD (1TB)', hasBox: false),
+          'assets/images/slim_cd_no_box.png');
+      expect(DeviceCatalog.assetImageFor('PS5 Slim Digital (1TB)', hasBox: false),
+          'assets/images/slim_digital_no_box.png');
+      expect(DeviceCatalog.assetImageFor('PS5 Pro Digital (2TB)', hasBox: false),
+          'assets/images/pro_no_box.png');
+    });
   });
 
   group('Trade multiple imagePaths serialization', () {

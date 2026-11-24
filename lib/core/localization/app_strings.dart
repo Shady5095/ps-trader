@@ -231,4 +231,19 @@ class AppStrings {
   static const String deleteAccountWarning = 'deleteAccountWarning';
   static const String deleteAccountInstruction = 'deleteAccountInstruction';
   static const String accountDeletedSuccess = 'accountDeletedSuccess';
+
+  /// Deal Highlights / Records
+  static const String dealHighlights = 'dealHighlights';
+  static const String highestProfitDevice = 'highestProfitDevice';
+  static const String fastestSoldDevice = 'fastestSoldDevice';
+  static const String cheapestBoughtDevice = 'cheapestBoughtDevice';
+  static const String mostExpensiveSoldDevice = 'mostExpensiveSoldDevice';
+  static const String mostGamesDevice = 'mostGamesDevice';
+  static const String sameDay = 'sameDay';
+  static const String oneDay = 'oneDay';
+  static const String twoDays = 'twoDays';
+  static const String daysCount = 'daysCount';
+  static const String gamesCountSuffix = 'gamesCountSuffix';
+  static const String noTradesInPeriod = 'noTradesInPeriod';
+  static const String pendingSale = 'pendingSale';
 }

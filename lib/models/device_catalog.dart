@@ -49,18 +49,20 @@ class DeviceCatalog {
     return match.icon;
   }
 
-  static String assetImageFor(String deviceType) {
+  static String assetImageFor(String deviceType, {bool hasBox = true}) {
     final lower = deviceType.toLowerCase();
+    final suffix = hasBox ? '.png' : '_no_box.png';
+
     if (lower.contains('pro')) {
-      return 'assets/images/pro.png';
+      return 'assets/images/pro$suffix';
     } else if (lower.contains('slim') && lower.contains('digital')) {
-      return 'assets/images/slim_digital.png';
+      return 'assets/images/slim_digital$suffix';
     } else if (lower.contains('slim')) {
-      return 'assets/images/slim_cd.png';
+      return 'assets/images/slim_cd$suffix';
     } else if (lower.contains('digital')) {
-      return 'assets/images/fat_digital.png';
+      return 'assets/images/fat_digital$suffix';
     } else {
-      return 'assets/images/fat_cd.png';
+      return 'assets/images/fat_cd$suffix';
     }
   }
 

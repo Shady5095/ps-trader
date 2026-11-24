@@ -594,5 +594,18 @@
   "deleteAccountAndDevices": "حذف الحساب وجميع الأجهزة",
   "deleteAccountWarning": "تحذير: سيتم حذف هذا الحساب وجميع الأجهزة والبيانات المسجلة عليه نهائياً. لا يمكن التراجع عن هذا الإجراء.",
   "deleteAccountInstruction": "لتأكيد الحذف، اكتب كلمة delete أدناه:",
-  "accountDeletedSuccess": "تم حذف الحساب وجميع الأجهزة بنجاح"
+  "accountDeletedSuccess": "تم حذف الحساب وجميع الأجهزة بنجاح",
+  "dealHighlights": "أبرز أرقام الصفقات",
+  "highestProfitDevice": "أعلى جهاز ربحاً (صافي)",
+  "fastestSoldDevice": "أسرع جهاز تم بيعه",
+  "cheapestBoughtDevice": "أرخص جهاز تم شراؤه",
+  "mostExpensiveSoldDevice": "أغلى جهاز تم بيعه",
+  "mostGamesDevice": "أكثر جهاز عليه ألعاب",
+  "sameDay": "في نفس اليوم",
+  "oneDay": "خلال يوم واحد",
+  "twoDays": "خلال يومين",
+  "daysCount": "أيام",
+  "gamesCountSuffix": "لعبة",
+  "noTradesInPeriod": "لا توجد صفقات مسجلة في هذه الفترة",
+  "pendingSale": "بانتظار أول بيع"
 }

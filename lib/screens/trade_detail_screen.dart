@@ -63,6 +63,7 @@ class TradeDetailScreen extends StatelessWidget {
           _DeviceImageCarousel(
             imagePaths: currentTrade.imagePaths,
             deviceType: currentTrade.deviceType,
+            hasBox: currentTrade.hasBox,
           ),
           _DetailCard(
             children: [
@@ -946,10 +947,12 @@ class TradeDetailScreen extends StatelessWidget {
 class _DeviceImageCarousel extends StatefulWidget {
   final List<String> imagePaths;
   final String deviceType;
+  final bool hasBox;
 
   const _DeviceImageCarousel({
     required this.imagePaths,
     required this.deviceType,
+    this.hasBox = true,
   });
 
   @override
@@ -996,22 +999,29 @@ class _DeviceImageCarouselState extends State<_DeviceImageCarousel> {
           width: double.infinity,
           color: AppColors.surfaceAlt,
           alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                DeviceCatalog.iconFor(widget.deviceType),
-                style: const TextStyle(fontSize: 54),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                AppStrings.noPhotosAvailable.tr(context),
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
+          child: Image.asset(
+            DeviceCatalog.assetImageFor(widget.deviceType,
+                hasBox: widget.hasBox),
+            height: 180,
+            width: double.infinity,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  DeviceCatalog.iconFor(widget.deviceType),
+                  style: const TextStyle(fontSize: 54),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  AppStrings.noPhotosAvailable.tr(context),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

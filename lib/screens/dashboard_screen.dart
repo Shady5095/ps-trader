@@ -14,6 +14,7 @@ import '../widgets/charts/monthly_profit_chart.dart';
 import '../widgets/charts/daily_profit_chart.dart';
 import '../widgets/charts/device_distribution_chart.dart';
 import '../widgets/charts/profit_by_device_chart.dart';
+import '../widgets/charts/deal_highlights_widget.dart';
 import '../widgets/charts/popular_games_row_widget.dart';
 import 'add_edit_trade_screen.dart';
 import 'more_screen.dart';
@@ -216,6 +217,11 @@ class _DashboardBodyState extends State<_DashboardBody> {
               _SectionCard(
                 title: AppStrings.profitByDevice.tr(context),
                 child: ProfitByDeviceChart(data: stats.byDeviceType()),
+              ),
+              const SizedBox(height: 16),
+              _SectionCard(
+                title: AppStrings.dealHighlights.tr(context),
+                child: DealHighlightsWidget(stats: stats),
               ),
               const SizedBox(height: 16),
               _SectionCard(

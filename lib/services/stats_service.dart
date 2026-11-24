@@ -103,6 +103,58 @@ class StatsService {
       ..sort((a, b) => b.count.compareTo(a.count));
   }
 
+  int tradeSoldDays(Trade t) {
+    if (t.sellDate == null) return 0;
+    final diff = t.sellDate!.difference(t.purchaseDate).inDays;
+    return diff < 0 ? 0 : diff;
+  }
+
+  /// 1. اكتر جهاز فيه مكسب فلوس مش roi
+  Trade? get highestProfitTrade {
+    final eligible = trades
+        .where((t) => t.status == TradeStatus.sold && t.profit != null)
+        .toList();
+    if (eligible.isEmpty) return null;
+    return eligible.reduce((max, t) => (t.profit ?? 0) > (max.profit ?? 0) ? t : max);
+  }
+
+  /// 2. اسرع جهاز اتباع
+  Trade? get fastestSoldTrade {
+    final eligible = trades
+        .where((t) => t.status == TradeStatus.sold && t.sellDate != null)
+        .toList();
+    if (eligible.isEmpty) return null;
+    return eligible.reduce((fastest, t) {
+      final d1 = tradeSoldDays(t);
+      final d2 = tradeSoldDays(fastest);
+      return d1 < d2 ? t : fastest;
+    });
+  }
+
+  /// 3. ارخص جهاز تم شرائه
+  Trade? get cheapestBoughtTrade {
+    final eligible = trades.where((t) => t.purchasePrice > 0).toList();
+    if (eligible.isEmpty) return null;
+    return eligible.reduce((min, t) => t.purchasePrice < min.purchasePrice ? t : min);
+  }
+
+  /// 4. اغلي جهاز تم بيعه
+  Trade? get mostExpensiveSoldTrade {
+    final eligible = trades
+        .where((t) => t.status == TradeStatus.sold && (t.sellPrice ?? 0) > 0)
+        .toList();
+    if (eligible.isEmpty) return null;
+    return eligible.reduce((max, t) => (t.sellPrice ?? 0) > (max.sellPrice ?? 0) ? t : max);
+  }
+
+  /// 5. اكتر جهاز عليه العاب
+  Trade? get mostGamesTrade {
+    int count(Trade t) => t.games.isNotEmpty ? t.games.length : t.gamesCount;
+    final eligible = trades.where((t) => count(t) > 0).toList();
+    if (eligible.isEmpty) return null;
+    return eligible.reduce((max, t) => count(t) > count(max) ? t : max);
+  }
+
   /// Calculates the most popular games among trades in this stats scope.
   /// [limit] defaults to 15 (Top 15).
   List<GamePopularity> popularGames({int limit = 15}) {
